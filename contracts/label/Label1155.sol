@@ -81,11 +81,7 @@ contract Label1155 is
     }
 
     function tokenUri(uint256 id) public view returns (string memory) {
-        return string(abi.encodePacked(_baseUri, uriStorage[id]));
-    }
-
-    function uri(uint256 id) public view override returns (string memory) {
-        return tokenUri(id);
+        return string(abi.encodePacked(uri(id), uriStorage[id]));
     }
 
     function _beforeTokenTransfer(

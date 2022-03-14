@@ -15,10 +15,20 @@ import "./static/StaticUtil.sol";
  * @title WyvernStatic
  * @author Wyvern Protocol Developers
  */
-contract LabelStatic is StaticERC20, StaticERC721, StaticERC1155, StaticUtil {
-    string public constant name = "Label Static";
+contract WyvernStatic is StaticERC20, StaticERC721, StaticERC1155, StaticUtil {
 
-    constructor(address atomicizerAddress) public {
+    string public constant name = "Wyvern Static";
+
+    constructor (address atomicizerAddress)
+        public
+    {
         atomicizer = atomicizerAddress;
     }
+
+    function test () 
+        public
+        pure
+    {
+    }
+
 }
