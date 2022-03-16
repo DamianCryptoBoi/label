@@ -211,21 +211,41 @@ contract("WyvernExchange", (accounts) => {
       two.salt++;
     }
 
-    let [account_a_erc20_balance, account_b_erc1155_balance] =
-      await Promise.all([
-        erc20.balanceOf(account_a),
-        erc1155.balanceOf(account_b, tokenId),
-      ]);
+    let [
+      account_a_erc20_balance,
+      account_b_erc1155_balance,
+      platformFeeRecipientBalance,
+    ] = await Promise.all([
+      erc20.balanceOf(account_a),
+      erc1155.balanceOf(account_b, tokenId),
+      erc20.balanceOf(platformFeeRecipient),
+    ]);
 
     const totalPay = sellingPrice * buyAmount * txCount;
     const totalFee =
       (totalPay * (royalties.reduce((a, b) => a + b) + platformFee)) / 10000;
+
+    for (let i = 0; i < creators.length; i++) {
+      feeAmount = await erc20.balanceOf(creators[i]);
+      assert.equal(
+        feeAmount.toNumber(),
+        (totalPay * royalties[i]) / 10000,
+        "Incorrect ERC20 balance"
+      );
+    }
 
     assert.equal(
       account_a_erc20_balance.toNumber(),
       totalPay - totalFee,
       "Incorrect ERC20 balance"
     );
+
+    assert.equal(
+      platformFeeRecipientBalance.toNumber(),
+      (totalPay * platformFee) / 10000,
+      "Incorrect ERC20 balance"
+    );
+
     assert.equal(
       account_b_erc1155_balance.toNumber(),
       sellingNumerator || buyAmount * txCount,
