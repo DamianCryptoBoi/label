@@ -51,6 +51,16 @@ contract Label1155 is
         _unpause();
     }
 
+    function getCreditsInfo(uint256 tokenId)
+        public
+        view
+        returns (address[] memory, uint256[] memory)
+    {
+        CreatorsInfo memory credit = _tokenCredit[tokenId];
+
+        return (credit.creators, credit.royalties);
+    }
+
     function mint(
         address[] memory accounts,
         uint256[] memory amounts,
