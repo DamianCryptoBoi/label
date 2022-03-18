@@ -60,9 +60,12 @@ contract("WyvernExchange", (accounts) => {
       royalties,
       platformFeeRecipient,
       platformFee,
+      moneyReceiver,
     } = options;
 
     const txCount = transactions || 1;
+
+    const mr = moneyReceiver || account_a;
 
     let { exchange, registry, erc20, erc1155 } = await deployCoreContracts();
 
@@ -112,7 +115,7 @@ contract("WyvernExchange", (accounts) => {
       );
 
     const erc1155c = new web3.eth.Contract(erc1155.abi, erc1155.address);
-    const erc20c = new web3.eth.Contract(erc20.abi, erc20.address);
+    // const erc20c = new web3.eth.Contract(erc20.abi, erc20.address);
     const paymentc = new web3.eth.Contract(payment.abi, payment.address);
 
     const selectorOne = web3.eth.abi.encodeFunctionSignature(
@@ -123,17 +126,19 @@ contract("WyvernExchange", (accounts) => {
     );
 
     const paramsOne = web3.eth.abi.encodeParameters(
-      ["address[3]", "uint256[3]"],
+      ["address[2]", "address[2]", "uint256[3]"],
       [
-        [erc1155.address, erc20.address, payment.address],
+        [erc1155.address, erc20.address],
+        [payment.address, mr],
         [tokenId, sellingNumerator || 1, sellingPrice],
       ]
     );
 
     const paramsTwo = web3.eth.abi.encodeParameters(
-      ["address[3]", "uint256[3]"],
+      ["address[2]", "address[2]", "uint256[3]"],
       [
-        [erc20.address, erc1155.address, payment.address],
+        [erc20.address, erc1155.address],
+        [payment.address, mr],
         [buyTokenId || tokenId, buyingPrice, buyingDenominator || 1],
       ]
     );
@@ -174,13 +179,7 @@ contract("WyvernExchange", (accounts) => {
         .encodeABI() + ZERO_BYTES32.substr(2);
 
     const secondData = paymentc.methods
-      .payForNFT(
-        account_b,
-        account_a,
-        buyAmount * buyingPrice,
-        erc20.address,
-        tokenId
-      )
+      .payForNFT(account_b, mr, buyAmount * buyingPrice, erc20.address, tokenId)
       .encodeABI();
 
     const firstCall = {
@@ -211,15 +210,12 @@ contract("WyvernExchange", (accounts) => {
       two.salt++;
     }
 
-    let [
-      account_a_erc20_balance,
-      account_b_erc1155_balance,
-      platformFeeRecipientBalance,
-    ] = await Promise.all([
-      erc20.balanceOf(account_a),
-      erc1155.balanceOf(account_b, tokenId),
-      erc20.balanceOf(platformFeeRecipient),
-    ]);
+    let [mrBalance, account_b_erc1155_balance, platformFeeRecipientBalance] =
+      await Promise.all([
+        erc20.balanceOf(mr),
+        erc1155.balanceOf(account_b, tokenId),
+        erc20.balanceOf(platformFeeRecipient),
+      ]);
 
     const totalPay = sellingPrice * buyAmount * txCount;
     const totalFee =
@@ -235,7 +231,7 @@ contract("WyvernExchange", (accounts) => {
     }
 
     assert.equal(
-      account_a_erc20_balance.toNumber(),
+      mrBalance.toNumber(),
       totalPay - totalFee,
       "Incorrect ERC20 balance"
     );
@@ -267,10 +263,11 @@ contract("WyvernExchange", (accounts) => {
       account_a: accounts[1],
       account_b: accounts[6],
       sender: accounts[6],
-      creators: [accounts[2], accounts[3], accounts[4]],
-      royalties: [300, 200, 150],
+      creators: [accounts[2], accounts[3]],
+      royalties: [300, 200],
       platformFeeRecipient: accounts[5],
       platformFee: 150,
+      moneyReceiver: accounts[4],
     });
   });
 
