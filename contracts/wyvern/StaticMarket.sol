@@ -14,7 +14,7 @@ import "./registry/AuthenticatedProxy.sol";
  * @author Wyvern Protocol Developers
  */
 contract StaticMarket {
-    string public constant name = "Static Market";
+    string public constant name = "Label Static Market";
     address public paymentManager;
 
     constructor(address _paymentManager) {
@@ -36,9 +36,10 @@ contract StaticMarket {
         );
 
         (
-            address[3] memory tokenGiveGet,
+            address[2] memory tokenGiveGet,
+            address[2] memory paymentManagerReceiver,
             uint256[3] memory tokenIdAndNumeratorDenominator
-        ) = abi.decode(extra, (address[3], uint256[3]));
+        ) = abi.decode(extra, (address[2], address[2], uint256[3]));
 
         require(
             tokenIdAndNumeratorDenominator[1] > 0,
@@ -53,7 +54,8 @@ contract StaticMarket {
             "anyERC1155ForERC20: call target must equal address of token to give"
         );
         require(
-            addresses[5] == tokenGiveGet[2] && addresses[5] == paymentManager,
+            addresses[5] == paymentManagerReceiver[0] &&
+                addresses[5] == paymentManager,
             "anyERC1155ForERC20: countercall target must equal address of payment manager"
         );
 
@@ -85,7 +87,7 @@ contract StaticMarket {
         checkPaymentManager(
             counterdata,
             addresses[4],
-            addresses[1],
+            paymentManagerReceiver[1],
             call_amounts[1],
             tokenGiveGet[1],
             tokenIdAndNumeratorDenominator[0]
@@ -179,9 +181,10 @@ contract StaticMarket {
         );
 
         (
-            address[3] memory tokenGiveGet,
+            address[2] memory tokenGiveGet,
+            address[2] memory paymentManagerReceiver,
             uint256[3] memory tokenIdAndNumeratorDenominator
-        ) = abi.decode(extra, (address[3], uint256[3]));
+        ) = abi.decode(extra, (address[2], address[2], uint256[3]));
 
         require(
             tokenIdAndNumeratorDenominator[1] > 0,
@@ -192,7 +195,8 @@ contract StaticMarket {
             "anyERC20ForERC1155: denominator must be larger than zero"
         );
         require(
-            addresses[2] == tokenGiveGet[2] && addresses[2] == paymentManager,
+            addresses[2] == paymentManagerReceiver[0] &&
+                addresses[2] == paymentManager,
             "anyERC20ForERC1155: call target must equal address of payment manager"
         );
         require(
@@ -228,7 +232,7 @@ contract StaticMarket {
         checkPaymentManager(
             data,
             addresses[1],
-            addresses[4],
+            paymentManagerReceiver[1],
             call_amounts[1],
             tokenGiveGet[0],
             tokenIdAndNumeratorDenominator[0]
