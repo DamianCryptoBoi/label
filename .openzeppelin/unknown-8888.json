@@ -211,7 +211,7 @@
     },
     "f27e4ea1ec19303934bda4e6868206599702b266f035d481322f3d57d4391b8d": {
       "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-      "txHash": "0xabbdca8303ec768da2e526df22cc775ac44c49c6196bcf70cbb5ab46464f0288",
+      "txHash": "0xb84d5eaa313a32c712495b3febaf83ec2cc948d840284cdeed18a0d201ecd8f2",
       "layout": {
         "storage": [
           {
@@ -311,42 +311,42 @@
             "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
           },
           {
-            "contract": "Label1155",
+            "contract": "LabelCollection",
             "label": "name",
             "type": "t_string_storage",
-            "src": "contracts/label/Label1155.sol:24"
+            "src": "contracts/label/LabelCollection.sol:24"
           },
           {
-            "contract": "Label1155",
+            "contract": "LabelCollection",
             "label": "symbol",
             "type": "t_string_storage",
-            "src": "contracts/label/Label1155.sol:25"
+            "src": "contracts/label/LabelCollection.sol:25"
           },
           {
-            "contract": "Label1155",
+            "contract": "LabelCollection",
             "label": "_tokenCredit",
-            "type": "t_mapping(t_uint256,t_struct(CreatorsInfo)4629_storage)",
-            "src": "contracts/label/Label1155.sol:26"
+            "type": "t_mapping(t_uint256,t_struct(CreatorsInfo)4863_storage)",
+            "src": "contracts/label/LabelCollection.sol:26"
           },
           {
-            "contract": "Label1155",
+            "contract": "LabelCollection",
             "label": "uriStorage",
             "type": "t_mapping(t_uint256,t_string_storage)",
-            "src": "contracts/label/Label1155.sol:27"
+            "src": "contracts/label/LabelCollection.sol:27"
           }
         ],
         "types": {
           "t_string_storage": {
             "label": "string"
           },
-          "t_mapping(t_uint256,t_struct(CreatorsInfo)4629_storage)": {
-            "label": "mapping(uint256 => struct Label1155.CreatorsInfo)"
+          "t_mapping(t_uint256,t_struct(CreatorsInfo)4863_storage)": {
+            "label": "mapping(uint256 => struct LabelCollection.CreatorsInfo)"
           },
           "t_uint256": {
             "label": "uint256"
           },
-          "t_struct(CreatorsInfo)4629_storage": {
-            "label": "struct Label1155.CreatorsInfo",
+          "t_struct(CreatorsInfo)4863_storage": {
+            "label": "struct LabelCollection.CreatorsInfo",
             "members": [
               {
                 "label": "creators",
