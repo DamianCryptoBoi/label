@@ -117,7 +117,11 @@ contract LabelCollection is
         return (credit.creators, credit.royalties);
     }
 
-    function getTokenCreator(uint256 tokenId) public pure returns (address) {
+    function getTokenCreatorById(uint256 tokenId)
+        public
+        pure
+        returns (address)
+    {
         return TokenIdentifiers.tokenCreator(tokenId);
     }
 
@@ -134,15 +138,16 @@ contract LabelCollection is
     }
 
     function mint(
-        address[] memory accounts,
-        uint256[] memory amounts,
+        address[] memory accounts, // the list of receivers after mint
+        uint256[] memory amounts, // the amounts that receivers get after mint
+        uint256 totalSupply,
         uint256 id,
         string memory uriStore,
         address[] memory creators,
         uint256[] memory royalties,
         bytes memory data
     ) public whenNotPaused {
-        require(isMinter[msg.sender], "Not minter");
+        // require(isMinter[msg.sender], "Not minter");
 
         require(
             TokenIdentifiers.tokenCreator(id) == creators[0],
@@ -164,8 +169,20 @@ contract LabelCollection is
         info.royalties = royalties;
         uriStorage[id] = uriStore;
 
+        //mint all to creator first
+        _mint(creators[0], id, totalSupply, data);
+
+        //transfer to the rest
         for (uint256 i = 0; i < accounts.length; i++) {
-            _mint(accounts[i], id, amounts[i], data);
+            if (creators[0] != accounts[i]) {
+                _safeTransferFrom(
+                    creators[0],
+                    accounts[i],
+                    id,
+                    amounts[i],
+                    data
+                );
+            }
         }
     }
 

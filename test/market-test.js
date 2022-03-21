@@ -1,44 +1,47 @@
-/* global artifacts:false, it:false, contract:false, assert:false */
+const { expect } = require("chai");
+const { ethers, upgrades } = require("hardhat");
 
-const WyvernAtomicizer = artifacts.require("WyvernAtomicizer");
-const WyvernExchange = artifacts.require("WyvernExchange");
-const StaticMarket = artifacts.require("StaticMarket");
-const WyvernRegistry = artifacts.require("WyvernRegistry");
-const TestERC20 = artifacts.require("MockLabel");
-const TestERC1155 = artifacts.require("Label1155");
-const PaymentManager = artifacts.require("PaymentManager");
+const LabelCollectionA = artifacts.require("LabelCollection");
+const PaymentManagerA = artifacts.require("PaymentManager");
 
 const {
   wrap,
   ZERO_BYTES32,
   CHAIN_ID,
   assertIsRejected,
+  getPredicateId,
 } = require("./common/util");
 
-contract("WyvernExchange", (accounts) => {
-  let deployCoreContracts = async () => {
-    let [registry, atomicizer] = await Promise.all([
-      WyvernRegistry.new(),
-      WyvernAtomicizer.new(),
-    ]);
-    let [exchange] = await Promise.all([
-      WyvernExchange.new(CHAIN_ID, [registry.address], "0x"),
-      ,
-    ]);
-    let [erc20, erc1155] = await Promise.all([
-      TestERC20.new(),
-      TestERC1155.new(),
-    ]);
+describe("Exchange", function () {
+  beforeEach(async () => {
+    accounts = await ethers.getSigners();
 
+    Registry = await ethers.getContractFactory("WyvernRegistry");
+    registry = await Registry.deploy();
+    await registry.deployed();
+
+    Exchange = await ethers.getContractFactory("WyvernExchange");
+    ex = await Exchange.deploy(CHAIN_ID, [registry.address], "0x");
+    await ex.deployed();
+    exchange = wrap(ex);
+
+    ERC20 = await ethers.getContractFactory("MockLabel");
+    erc20 = await ERC20.deploy();
+    await erc20.deployed();
+
+    ERC1155 = await ethers.getContractFactory("LabelCollection");
+    erc1155 = await upgrades.deployProxy(ERC1155, ["/test", registry.address], {
+      kind: "uups",
+    });
+    await erc1155.deployed();
+
+    PaymentManager = await ethers.getContractFactory("PaymentManager");
+
+    StaticMarket = await ethers.getContractFactory("StaticMarket");
+
+    //settings
     await registry.grantInitialAuthentication(exchange.address);
-    return {
-      registry,
-      exchange: wrap(exchange),
-      atomicizer,
-      erc20,
-      erc1155,
-    };
-  };
+  });
 
   const test = async (options) => {
     const {
@@ -63,60 +66,76 @@ contract("WyvernExchange", (accounts) => {
       moneyReceiver,
     } = options;
 
+    id = getPredicateId(creators[0], tokenId, erc1155MintAmount);
+    bid = getPredicateId(
+      creators[0],
+      buyTokenId || 686868686,
+      erc1155MintAmount
+    );
+
     const txCount = transactions || 1;
 
     const mr = moneyReceiver || account_a;
 
-    let { exchange, registry, erc20, erc1155 } = await deployCoreContracts();
-
-    let payment = await PaymentManager.new(
+    let payment = await PaymentManager.deploy(
       erc1155.address,
       platformFeeRecipient,
-      platformFee //5%
+      platformFee
     );
 
-    let statici = await StaticMarket.new(payment.address);
+    await payment.deployed();
 
-    await registry.registerProxy({ from: account_a });
-    let proxy1 = await registry.proxies(account_a);
+    let statici = await StaticMarket.deploy(payment.address);
+    await statici.deployed();
+
+    await registry.connect(account_a).registerProxy();
+    let proxy1 = await registry.connect(account_a).proxies(account_a.address);
     assert.equal(true, proxy1.length > 0, "no proxy address for account a");
 
-    await registry.registerProxy({ from: account_b });
-    let proxy2 = await registry.proxies(account_b);
+    await registry.connect(account_b).registerProxy();
+    let proxy2 = await registry.connect(account_b).proxies(account_b.address);
     assert.equal(true, proxy2.length > 0, "no proxy address for account b");
 
     await Promise.all([
-      erc1155.setApprovalForAll(proxy1, true, { from: account_a }),
-      erc20.approve(proxy2, erc20MintAmount, { from: account_b }),
-      erc20.approve(payment.address, erc20MintAmount, { from: account_b }),
+      //   erc1155.setApprovalForAll(proxy1, true, { from: account_a }),
+      //   erc20.approve(proxy2, erc20MintAmount, { from: account_b }),
+      erc20.connect(account_b).approve(payment.address, erc20MintAmount),
     ]);
     await Promise.all([
       erc1155.mint(
-        [account_a],
+        [account_a.address],
         [erc1155MintAmount],
-        tokenId,
+        erc1155MintAmount,
+        id,
         "/test",
         creators,
         royalties,
         "0x"
       ),
-      erc20.mint(account_b, erc20MintAmount),
+      erc20.mint(account_b.address, erc20MintAmount),
     ]);
 
     if (buyTokenId)
       await erc1155.mint(
-        [account_a],
+        [account_a.address],
         [erc1155MintAmount],
-        buyTokenId,
+        erc1155MintAmount,
+        bid,
         "/test",
         creators,
         royalties,
         "0x"
       );
 
-    const erc1155c = new web3.eth.Contract(erc1155.abi, erc1155.address);
+    const erc1155c = new web3.eth.Contract(
+      LabelCollectionA.abi,
+      erc1155.address
+    );
     // const erc20c = new web3.eth.Contract(erc20.abi, erc20.address);
-    const paymentc = new web3.eth.Contract(payment.abi, payment.address);
+    const paymentc = new web3.eth.Contract(
+      PaymentManagerA.abi,
+      payment.address
+    );
 
     const selectorOne = web3.eth.abi.encodeFunctionSignature(
       "anyERC1155ForERC20SplitFee(bytes,address[7],uint8[2],uint256[6],bytes,bytes)"
@@ -130,7 +149,7 @@ contract("WyvernExchange", (accounts) => {
       [
         [erc1155.address, erc20.address],
         [payment.address, mr],
-        [tokenId, sellingNumerator || 1, sellingPrice],
+        [id, sellingNumerator || 1, sellingPrice],
       ]
     );
 
@@ -139,13 +158,13 @@ contract("WyvernExchange", (accounts) => {
       [
         [erc20.address, erc1155.address],
         [payment.address, mr],
-        [buyTokenId || tokenId, buyingPrice, buyingDenominator || 1],
+        [buyTokenId ? bid : id, buyingPrice, buyingDenominator || 1],
       ]
     );
 
     const one = {
       registry: registry.address,
-      maker: account_a,
+      maker: account_a.address,
       staticTarget: statici.address,
       staticSelector: selectorOne,
       staticExtradata: paramsOne,
@@ -157,7 +176,7 @@ contract("WyvernExchange", (accounts) => {
 
     const two = {
       registry: registry.address,
-      maker: account_b,
+      maker: account_b.address,
       staticTarget: statici.address,
       staticSelector: selectorTwo,
       staticExtradata: paramsTwo,
@@ -170,16 +189,22 @@ contract("WyvernExchange", (accounts) => {
     const firstData =
       erc1155c.methods
         .safeTransferFrom(
-          account_a,
-          account_b,
-          tokenId,
+          account_a.address,
+          account_b.address,
+          id,
           sellingNumerator || buyAmount,
           "0x"
         )
         .encodeABI() + ZERO_BYTES32.substr(2);
 
     const secondData = paymentc.methods
-      .payForNFT(account_b, mr, buyAmount * buyingPrice, erc20.address, tokenId)
+      .payForNFT(
+        account_b.address,
+        mr,
+        buyAmount * buyingPrice,
+        erc20.address,
+        id
+      )
       .encodeABI();
 
     const firstCall = {
@@ -193,10 +218,10 @@ contract("WyvernExchange", (accounts) => {
       data: secondData,
     };
 
-    let sigOne = await exchange.sign(one, account_a);
+    let sigOne = await exchange.sign(one, account_a.address);
 
     for (var i = 0; i < txCount; ++i) {
-      let sigTwo = await exchange.sign(two, account_b);
+      let sigTwo = await exchange.sign(two, account_b.address);
       await exchange.atomicMatchWith(
         one,
         sigOne,
@@ -204,8 +229,7 @@ contract("WyvernExchange", (accounts) => {
         two,
         sigTwo,
         secondCall,
-        ZERO_BYTES32,
-        { from: sender || account_a }
+        ZERO_BYTES32
       );
       two.salt++;
     }
@@ -213,7 +237,7 @@ contract("WyvernExchange", (accounts) => {
     let [mrBalance, account_b_erc1155_balance, platformFeeRecipientBalance] =
       await Promise.all([
         erc20.balanceOf(mr),
-        erc1155.balanceOf(account_b, tokenId),
+        erc1155.balanceOf(account_b.address, id),
         erc20.balanceOf(platformFeeRecipient),
       ]);
 
@@ -263,11 +287,32 @@ contract("WyvernExchange", (accounts) => {
       account_a: accounts[1],
       account_b: accounts[6],
       sender: accounts[6],
-      creators: [accounts[2], accounts[3]],
+      creators: [accounts[2].address, accounts[3].address],
       royalties: [300, 200],
-      platformFeeRecipient: accounts[5],
+      platformFeeRecipient: accounts[5].address,
       platformFee: 150,
-      moneyReceiver: accounts[4],
+      moneyReceiver: accounts[4].address,
+    });
+  });
+  it("StaticMarket: matches erc1155 <> erc20 order, 1 fill", async () => {
+    const price = 10000;
+
+    return test({
+      tokenId: 5,
+      sellAmount: 1,
+      sellingPrice: price,
+      buyingPrice: price,
+      buyAmount: 1,
+      erc1155MintAmount: 1,
+      erc20MintAmount: price,
+      account_a: accounts[1],
+      account_b: accounts[6],
+      sender: accounts[6],
+      creators: [accounts[2].address, accounts[3].address],
+      royalties: [300, 200],
+      platformFeeRecipient: accounts[5].address,
+      platformFee: 150,
+      moneyReceiver: accounts[4].address,
     });
   });
 
@@ -286,10 +331,11 @@ contract("WyvernExchange", (accounts) => {
       account_a: accounts[1],
       account_b: accounts[6],
       sender: accounts[6],
-      creators: [accounts[2], accounts[3], accounts[4]],
-      royalties: [300, 200, 150],
-      platformFeeRecipient: accounts[5],
+      creators: [accounts[2].address, accounts[3].address],
+      royalties: [300, 200],
+      platformFeeRecipient: accounts[5].address,
       platformFee: 150,
+      moneyReceiver: accounts[4].address,
     });
   });
 
@@ -310,10 +356,11 @@ contract("WyvernExchange", (accounts) => {
       account_a: accounts[1],
       account_b: accounts[6],
       sender: accounts[6],
-      creators: [accounts[2], accounts[3], accounts[4]],
-      royalties: [300, 200, 150],
-      platformFeeRecipient: accounts[5],
+      creators: [accounts[2].address, accounts[3].address],
+      royalties: [300, 200],
+      platformFeeRecipient: accounts[5].address,
       platformFee: 150,
+      moneyReceiver: accounts[4].address,
     });
   });
 
@@ -333,10 +380,11 @@ contract("WyvernExchange", (accounts) => {
       account_a: accounts[1],
       account_b: accounts[6],
       sender: accounts[6],
-      creators: [accounts[2], accounts[3], accounts[4]],
-      royalties: [300, 200, 150],
-      platformFeeRecipient: accounts[5],
+      creators: [accounts[2].address, accounts[3].address],
+      royalties: [300, 200],
+      platformFeeRecipient: accounts[5].address,
       platformFee: 150,
+      moneyReceiver: accounts[4].address,
     });
   });
 
@@ -357,10 +405,11 @@ contract("WyvernExchange", (accounts) => {
       account_a: accounts[1],
       account_b: accounts[6],
       sender: accounts[6],
-      creators: [accounts[2], accounts[3], accounts[4]],
-      royalties: [300, 200, 250],
-      platformFeeRecipient: accounts[5],
-      platformFee: 250,
+      creators: [accounts[2].address, accounts[3].address],
+      royalties: [300, 200],
+      platformFeeRecipient: accounts[5].address,
+      platformFee: 150,
+      moneyReceiver: accounts[4].address,
     });
   });
 
@@ -380,10 +429,11 @@ contract("WyvernExchange", (accounts) => {
         account_a: accounts[1],
         account_b: accounts[6],
         sender: accounts[6],
-        creators: [accounts[2], accounts[3], accounts[4]],
-        royalties: [300, 200, 150],
-        platformFeeRecipient: accounts[5],
+        creators: [accounts[2].address, accounts[3].address],
+        royalties: [300, 200],
+        platformFeeRecipient: accounts[5].address,
         platformFee: 150,
+        moneyReceiver: accounts[4].address,
       }),
       /First order has invalid parameters/,
       "Order should not match the second time."
@@ -405,10 +455,11 @@ contract("WyvernExchange", (accounts) => {
         account_a: accounts[1],
         account_b: accounts[6],
         sender: accounts[6],
-        creators: [accounts[2], accounts[3], accounts[4]],
-        royalties: [300, 200, 150],
-        platformFeeRecipient: accounts[5],
+        creators: [accounts[2].address, accounts[3].address],
+        royalties: [300, 200],
+        platformFeeRecipient: accounts[5].address,
         platformFee: 150,
+        moneyReceiver: accounts[4].address,
       }),
       /Static call failed/,
       "Order should not match."
@@ -431,10 +482,11 @@ contract("WyvernExchange", (accounts) => {
         account_a: accounts[1],
         account_b: accounts[6],
         sender: accounts[6],
-        creators: [accounts[2], accounts[3], accounts[4]],
-        royalties: [300, 200, 150],
-        platformFeeRecipient: accounts[5],
+        creators: [accounts[2].address, accounts[3].address],
+        royalties: [300, 200],
+        platformFeeRecipient: accounts[5].address,
         platformFee: 150,
+        moneyReceiver: accounts[4].address,
       }),
       /Static call failed/,
       "Order should not match."
@@ -458,10 +510,11 @@ contract("WyvernExchange", (accounts) => {
         account_a: accounts[1],
         account_b: accounts[6],
         sender: accounts[6],
-        creators: [accounts[2], accounts[3], accounts[4]],
-        royalties: [300, 200, 150],
-        platformFeeRecipient: accounts[5],
+        creators: [accounts[2].address, accounts[3].address],
+        royalties: [300, 200],
+        platformFeeRecipient: accounts[5].address,
         platformFee: 150,
+        moneyReceiver: accounts[4].address,
       }),
       /First call failed/,
       "Order should not fill"
@@ -485,10 +538,11 @@ contract("WyvernExchange", (accounts) => {
         account_a: accounts[1],
         account_b: accounts[6],
         sender: accounts[6],
-        creators: [accounts[2], accounts[3], accounts[4]],
-        royalties: [300, 200, 150],
-        platformFeeRecipient: accounts[5],
+        creators: [accounts[2].address, accounts[3].address],
+        royalties: [300, 200],
+        platformFeeRecipient: accounts[5].address,
         platformFee: 150,
+        moneyReceiver: accounts[4].address,
       }),
       /Second call failed/,
       "Order should not fill"
@@ -511,10 +565,11 @@ contract("WyvernExchange", (accounts) => {
         account_a: accounts[1],
         account_b: accounts[6],
         sender: accounts[6],
-        creators: [accounts[2], accounts[3], accounts[4]],
-        royalties: [300, 200, 150],
-        platformFeeRecipient: accounts[5],
+        creators: [accounts[2].address, accounts[3].address],
+        royalties: [300, 200],
+        platformFeeRecipient: accounts[5].address,
         platformFee: 150,
+        moneyReceiver: accounts[4].address,
       }),
       /Static call failed/,
       "Order should not match the second time."

@@ -1,5 +1,5 @@
 const { eip712Domain, structHash, signHash } = require("./eip712.js");
-const { network } = require("hardhat");
+const { network, ethers } = require("hardhat");
 
 const assertIsRejected = (promise, error_match, message) => {
   let passed = false;
@@ -105,7 +105,7 @@ const parseSig = (bytes) => {
 
 const wrap = (inst) => {
   var obj = {
-    inst: inst,
+    ...inst,
     hashOrder: (order) =>
       inst.hashOrder_.call(
         order.registry,
@@ -270,8 +270,7 @@ const wrap = (inst) => {
               [countersig.v, countersig.r, countersig.s]
             ) + (countersig.suffix || ""),
           ]
-        ),
-        misc
+        )
       ),
   };
   obj.sign = (order, account) => {
@@ -307,6 +306,33 @@ const randomUint = () => {
   return Math.floor(Math.random() * 1e10);
 };
 
+const getPredicateId = (creator, index, totalSupply) => {
+  /*
+      DESIGN NOTES:
+      Token ids are a concatenation of:
+      * creator: hex address of the creator of the token. 160 bits
+      * index: Index for this token (the regular ID), up to 2^56 - 1. 56 bits
+      * supply: Supply cap for this token, up to 2^40 - 1 (1 trillion).  40 bits
+    */
+
+  //address is 20 bytes => 160 bits
+
+  const indexHex = ethers.utils.hexZeroPad(ethers.utils.hexValue(index), 7); // 7 bytes => 56 bits
+
+  const totalSupplyHex = ethers.utils.hexZeroPad(
+    ethers.utils.hexValue(totalSupply),
+    5
+  ); // 5 bytes => 40 bits
+
+  const predicatedIdHex = ethers.utils.hexStripZeros(
+    ethers.utils.hexConcat([creator, indexHex, totalSupplyHex])
+  );
+
+  const predicatedId = ethers.BigNumber.from(predicatedIdHex).toString();
+
+  return predicatedId;
+};
+
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const ZERO_BYTES32 =
   "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -322,6 +348,7 @@ module.exports = {
   assertIsRejected,
   wrap,
   randomUint,
+  getPredicateId,
   ZERO_ADDRESS,
   ZERO_BYTES32,
   NULL_SIG,
