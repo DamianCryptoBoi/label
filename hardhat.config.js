@@ -2,9 +2,11 @@ require("dotenv").config();
 
 require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-waffle");
-require("hardhat-gas-reporter");
+// require("hardhat-gas-reporter");
 require("solidity-coverage");
 require("@openzeppelin/hardhat-upgrades");
+require("@nomiclabs/hardhat-web3");
+require("@nomiclabs/hardhat-truffle5");
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -47,7 +49,7 @@ module.exports = {
       blockGasLimit: 0x1fffffffffffff,
       allowUnlimitedContractSize: true,
       timeout: 1800000,
-      chainId: 6996,
+      chainId: 8888,
     },
     rinkeby: {
       url: process.env.PROVIDER_URL,
