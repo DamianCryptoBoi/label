@@ -55,6 +55,7 @@ describe("Collection", function () {
         expect(royalties[0].toNumber()).to.be.equal(300);
 
         expect(await label1155.tokenUri(predicatedId)).to.be.equal("/test/abc");
+        expect(await label1155.tokenUri(0)).to.be.equal("/test"); //token id not exist => return base uri
 
         expect(await label1155.getTokenCreatorById(predicatedId)).to.be.equal(
             owner.address

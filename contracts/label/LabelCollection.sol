@@ -191,7 +191,12 @@ contract LabelCollection is
     }
 
     function tokenUri(uint256 id) public view returns (string memory) {
-        return string(abi.encodePacked(uri(id), uriStorage[id]));
+        return uri(id);
+    }
+
+    function uri(uint256 id) public view override returns (string memory) {
+        string memory baseUri = super.uri(id);
+        return string(abi.encodePacked(baseUri, uriStorage[id]));
     }
 
     function isApprovedForAll(address _owner, address _operator)
