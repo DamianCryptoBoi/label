@@ -1,30 +1,59 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
-const hre = require("hardhat");
+const { ethers, upgrades, network } = require("hardhat");
+
+const CHAIN_ID = network.config.chainId;
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+    console.log("-----------DEPLOYMENT STARTED-----------");
 
-  // We get the contract to deploy
-  const Greeter = await hre.ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+    Registry = await ethers.getContractFactory("WyvernRegistry");
+    registry = await Registry.deploy();
+    await registry.deployed();
+    console.log("WyvernRegistry: " + registry.address);
 
-  await greeter.deployed();
+    Exchange = await ethers.getContractFactory("WyvernExchange");
+    exchange = await Exchange.deploy(CHAIN_ID, [registry.address], "0x");
+    await exchange.deployed();
+    console.log("WyvernExchange: " + exchange.address);
 
-  console.log("Greeter deployed to:", greeter.address);
+    ERC1155 = await ethers.getContractFactory("LabelCollection");
+    erc1155 = await upgrades.deployProxy(
+        ERC1155,
+        ["ipfs://", registry.address],
+        {
+            kind: "uups",
+        }
+    );
+    await erc1155.deployed();
+
+    console.log("LabelCollection: " + erc1155.address);
+
+    platformFeeRecipient = await erc1155.owner();
+    platformFee = 250; // 2.5%
+
+    PaymentManager = await ethers.getContractFactory("PaymentManager");
+    payment = await PaymentManager.deploy(
+        erc1155.address,
+        platformFeeRecipient,
+        platformFee
+    );
+    await payment.deployed();
+
+    console.log("PaymentManager: " + payment.address);
+
+    StaticMarket = await ethers.getContractFactory("StaticMarket");
+    let statici = await StaticMarket.deploy(payment.address);
+    await statici.deployed();
+
+    console.log("StaticMarket: " + statici.address);
+
+    console.log("-----------SETTINGS AFTER DEPLOY-----------");
+
+    await registry.grantInitialAuthentication(exchange.address);
+
+    console.log("-----------DONE-----------");
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+    console.error(error);
+    process.exitCode = 1;
 });

@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MockLabel is ERC20, Ownable {
     constructor() ERC20("MockLabel", "LBL") {
-        _mint(msg.sender, 100000 * 10**decimals());
+        _mint(msg.sender, 10**9 * 10**decimals());
     }
 
     function mint(address to, uint256 amount) public {
