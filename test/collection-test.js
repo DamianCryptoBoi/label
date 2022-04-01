@@ -32,7 +32,7 @@ describe("Collection", function () {
 
     await label1155.mint(
       [addr1.address, addr2.address, owner.address],
-      [10, 20, 30],
+      [10, 20, 30], // amount
       100,
       predicatedId,
       "/abc",
@@ -50,8 +50,9 @@ describe("Collection", function () {
     expect(
       parseInt(await label1155.balanceOf(addr2.address, predicatedId))
     ).to.be.equal(20);
+    //
+    [creators, royalties,totalroyalties] = await label1155.getCreditsInfo(predicatedId);
 
-    [creators, royalties] = await label1155.getCreditsInfo(predicatedId);
     expect(creators[0]).to.be.equal(owner.address);
     expect(royalties[0].toNumber()).to.be.equal(300);
 
