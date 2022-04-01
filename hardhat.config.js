@@ -11,7 +11,13 @@ require("@nomiclabs/hardhat-truffle5");
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
+ const ALCHEMY_API_KEY = "-ouNvueg5iUjso0-hDsTCcCmmvIZ-tiS";
 
+ // Replace this private key with your Ropsten account private key
+ // To export your private key from Metamask, open Metamask and
+ // go to Account Details > Export Private Key
+ // Be aware of NEVER putting real Ether into testing accounts
+ const ROPSTEN_PRIVATE_KEY = "42cedf3184b3a10395af011a9073c1b247c0fdfa35e9bc35a8bba1d21b3dc089";
 module.exports = {
     solidity: {
         compilers: [

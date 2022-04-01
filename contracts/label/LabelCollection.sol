@@ -56,6 +56,7 @@ contract LabelCollection is
     struct CreatorsInfo {
         address[] creators;
         uint256[] royalties;
+        uint256 totalroyalties;
     }
 
     address proxyRegistryAddress;
@@ -112,11 +113,11 @@ contract LabelCollection is
     function getCreditsInfo(uint256 tokenId)
         public
         view
-        returns (address[] memory, uint256[] memory)
+        returns (address[] memory, uint256[] memory,uint256)
     {
         CreatorsInfo memory credit = _tokenCredit[tokenId];
 
-        return (credit.creators, credit.royalties);
+        return (credit.creators, credit.royalties,credit.totalroyalties);
     }
 
     function getTokenCreatorById(uint256 tokenId)
@@ -147,6 +148,7 @@ contract LabelCollection is
         string memory uriStore,
         address[] memory creators,
         uint256[] memory royalties,
+        uint256 totalRoyalties,
         bytes memory data
     ) public whenNotPaused onlyMinter returns (uint256) {
         require(!exists(id), "Token existed");
@@ -168,7 +170,8 @@ contract LabelCollection is
 
         CreatorsInfo storage info = _tokenCredit[id];
         info.creators = creators;
-        info.royalties = royalties;
+        info.royalties = royalties; //[600,200,200]
+        info.totalroyalties = totalRoyalties;
         uriStorage[id] = uriStore;
 
         //mint all to creator first

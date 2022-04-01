@@ -8,7 +8,7 @@ interface ILabelCollection {
     function getCreditsInfo(uint256 tokenId)
         external
         view
-        returns (address[] memory, uint256[] memory);
+        returns (address[] memory, uint256[] memory,uint256);
 }
 
 contract PaymentManager is Ownable {
@@ -59,8 +59,8 @@ contract PaymentManager is Ownable {
     ) external {
         address[] memory feeRecipients;
         uint256[] memory feeRatios;
-
-        (feeRecipients, feeRatios) = labelCollection.getCreditsInfo(_nftId);
+        uint256 feeTotalRoyalties;
+        (feeRecipients, feeRatios,feeTotalRoyalties) = labelCollection.getCreditsInfo(_nftId);
 
         require(feeRecipients.length == feeRatios.length, "invalid fee info");
         uint256 payAmount = _totalAmount;
@@ -75,8 +75,9 @@ contract PaymentManager is Ownable {
         payAmount -= platformFeeAmount;
 
         // pay royalties
+        uint256 totalRoyalAmount  = feeTotalRoyalties * _totalAmount;
         for (uint256 i = 0; i < feeRatios.length; i++) {
-            uint256 feeAmount = getFeeAmount(_totalAmount, feeRatios[i]);
+            uint256 feeAmount = getFeeAmount(totalRoyalAmount, feeRatios[i]);
             _paymentToken.transferFrom(_from, feeRecipients[i], feeAmount);
             payAmount -= feeAmount;
         }
