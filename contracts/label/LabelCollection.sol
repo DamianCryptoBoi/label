@@ -56,6 +56,7 @@ contract LabelCollection is
     struct CreatorsInfo {
         address[] creators;
         uint256[] royalties;
+        uint256 totalroyalties;
     }
 
     address proxyRegistryAddress;
@@ -110,11 +111,11 @@ contract LabelCollection is
     function getCreditsInfo(uint256 tokenId)
         public
         view
-        returns (address[] memory, uint256[] memory)
+        returns (address[] memory, uint256[] memory,uint256)
     {
         CreatorsInfo memory credit = _tokenCredit[tokenId];
 
-        return (credit.creators, credit.royalties);
+        return (credit.creators, credit.royalties,credit.totalroyalties);
     }
 
     function getTokenCreatorById(uint256 tokenId)
@@ -172,6 +173,10 @@ contract LabelCollection is
         //mint all to creator first
         _mint(creators[0], id, totalSupply, data);
 
+        // sum total royalties
+        for(uint256 i = 0; i < royalties.length; i++){
+            info.totalroyalties += royalties[i];
+        }
         //transfer to the rest
         for (uint256 i = 0; i < accounts.length; i++) {
             if (creators[0] != accounts[i]) {

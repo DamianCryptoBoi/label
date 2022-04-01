@@ -6,7 +6,7 @@ const { getPredicateId } = require("./common/util");
 describe("Collection", function () {
   let owner, Label1155, label1155;
   beforeEach(async () => {
-    [owner, addr1, addr2] = await ethers.getSigners();
+    [owner, addr1, addr2,addr3] = await ethers.getSigners();
 
     Registry = await ethers.getContractFactory("WyvernRegistry");
     registry = await Registry.deploy();
@@ -36,8 +36,8 @@ describe("Collection", function () {
       100,
       predicatedId,
       "/abc",
-      [owner.address],
-      [300],
+      [owner.address, addr2.address,addr3.address],
+      [300,100,100], // total royal = 5% [600,200,200]
       "0x"
     );
 
