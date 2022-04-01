@@ -8,27 +8,27 @@ describe("Collection", function () {
   beforeEach(async () => {
     [owner, addr1, addr2,addr3] = await ethers.getSigners();
 
-    Registry = await ethers.getContractFactory("WyvernRegistry");
-    registry = await Registry.deploy();
-    await registry.deployed();
+        Registry = await ethers.getContractFactory("WyvernRegistry");
+        registry = await Registry.deploy();
+        await registry.deployed();
 
-    Label1155 = await ethers.getContractFactory("LabelCollection");
-    label1155 = await upgrades.deployProxy(
-      Label1155,
-      ["/test", registry.address],
-      {
-        kind: "uups",
-      }
-    );
-    await label1155.deployed();
-  });
+        Label1155 = await ethers.getContractFactory("LabelCollection");
+        label1155 = await upgrades.deployProxy(
+            Label1155,
+            ["/test", registry.address],
+            {
+                kind: "uups",
+            }
+        );
+        await label1155.deployed();
+    });
 
-  it("Should return the owner", async function () {
-    expect(await label1155.owner()).to.equal(owner.address);
-  });
+    it("Should return the owner", async function () {
+        expect(await label1155.owner()).to.equal(owner.address);
+    });
 
-  it("Mint", async function () {
-    const predicatedId = getPredicateId(owner.address, 0, 100);
+    it("Mint", async function () {
+        const predicatedId = getPredicateId(owner.address, 0, 100);
 
     await label1155.mint(
       [addr1.address, addr2.address, owner.address], // acount 
@@ -63,14 +63,12 @@ describe("Collection", function () {
     expect(totalroyalties.toNumber()).to.be.equal(500);
     expect(await label1155.tokenUri(predicatedId)).to.be.equal("/test/abc");
 
-    expect(await label1155.getTokenCreatorById(predicatedId)).to.be.equal(
-      owner.address
-    );
+        expect(await label1155.getTokenIndexById(predicatedId)).to.be.equal(
+            "0"
+        );
 
-    expect(await label1155.getTokenIndexById(predicatedId)).to.be.equal("0");
-
-    expect(await label1155.getTokenMaxSupplyById(predicatedId)).to.be.equal(
-      "100"
-    );
-  });
+        expect(await label1155.getTokenMaxSupplyById(predicatedId)).to.be.equal(
+            "100"
+        );
+    });
 });

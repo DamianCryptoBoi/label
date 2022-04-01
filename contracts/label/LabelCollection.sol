@@ -66,6 +66,11 @@ contract LabelCollection is
     mapping(uint256 => string) public uriStorage;
     mapping(address => bool) private isMinter;
 
+    modifier onlyMinter() {
+        require(isMinter[msg.sender] || msg.sender == owner(), "Not minter");
+        _;
+    }
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -84,15 +89,12 @@ contract LabelCollection is
         isMinter[msg.sender] = true;
     }
 
-    function grantMinterRole(address[] memory minters) external onlyOwner {
-        for (uint256 i = 0; i < minters.length; i++) {
-            isMinter[minters[i]] = true;
-        }
-    }
-
-    function revokeMinterRole(address[] memory minters) external onlyOwner {
-        for (uint256 i = 0; i < minters.length; i++) {
-            isMinter[minters[i]] = false;
+    function setMinterRole(address[] memory minters, bool isAuthorized)
+        external
+        onlyOwner
+    {
+        for (uint8 i = 0; i < minters.length; i++) {
+            isMinter[minters[i]] = isAuthorized;
         }
     }
 
@@ -141,15 +143,15 @@ contract LabelCollection is
     function mint(
         address[] memory accounts, // the list of receivers after mint
         uint256[] memory amounts, // the amounts that receivers get after mint
-        uint256 totalSupply,
+        uint256 supply,
         uint256 id,
         string memory uriStore,
         address[] memory creators,
         uint256[] memory royalties,
         uint256 totalRoyalties,
         bytes memory data
-    ) public whenNotPaused {
-        // require(isMinter[msg.sender], "Not minter");
+    ) public whenNotPaused onlyMinter returns (uint256) {
+        require(!exists(id), "Token existed");
 
         require(
             TokenIdentifiers.tokenCreator(id) == creators[0],
@@ -173,9 +175,9 @@ contract LabelCollection is
         uriStorage[id] = uriStore;
 
         //mint all to creator first
-        _mint(creators[0], id, totalSupply, data);
+        _mint(creators[0], id, supply, data);
 
-        //transfer to the rest
+        //then transfer from creator to the rest
         for (uint256 i = 0; i < accounts.length; i++) {
             if (creators[0] != accounts[i]) {
                 _safeTransferFrom(
@@ -183,14 +185,21 @@ contract LabelCollection is
                     accounts[i],
                     id,
                     amounts[i],
-                    data
+                    "0x"
                 );
             }
         }
+
+        return id;
     }
 
     function tokenUri(uint256 id) public view returns (string memory) {
-        return string(abi.encodePacked(uri(id), uriStorage[id]));
+        return uri(id);
+    }
+
+    function uri(uint256 id) public view override returns (string memory) {
+        string memory baseUri = super.uri(id);
+        return string(abi.encodePacked(baseUri, uriStorage[id]));
     }
 
     function isApprovedForAll(address _owner, address _operator)
