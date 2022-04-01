@@ -3,12 +3,17 @@ pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
 interface ILabelCollection {
     function getCreditsInfo(uint256 tokenId)
         external
         view
-        returns (address[] memory, uint256[] memory,uint256);
+        returns (
+            address[] memory,
+            uint256[] memory,
+            uint256
+        );
 }
 
 contract PaymentManager is Ownable {
@@ -59,8 +64,9 @@ contract PaymentManager is Ownable {
     ) external {
         address[] memory feeRecipients;
         uint256[] memory feeRatios;
-        uint256 feeTotalRoyalties;
-        (feeRecipients, feeRatios,feeTotalRoyalties) = labelCollection.getCreditsInfo(_nftId);
+        uint256 totalRoyalties;
+        (feeRecipients, feeRatios, totalRoyalties) = labelCollection
+            .getCreditsInfo(_nftId);
 
         require(feeRecipients.length == feeRatios.length, "invalid fee info");
         uint256 payAmount = _totalAmount;
@@ -75,9 +81,9 @@ contract PaymentManager is Ownable {
         payAmount -= platformFeeAmount;
 
         // pay royalties
-        uint256 totalRoyalAmount  = feeTotalRoyalties * _totalAmount;
+        uint256 totalRoyaltyAmount = getFeeAmount(_totalAmount, totalRoyalties);
         for (uint256 i = 0; i < feeRatios.length; i++) {
-            uint256 feeAmount = getFeeAmount(totalRoyalAmount, feeRatios[i]);
+            uint256 feeAmount = getFeeAmount(totalRoyaltyAmount, feeRatios[i]);
             _paymentToken.transferFrom(_from, feeRecipients[i], feeAmount);
             payAmount -= feeAmount;
         }

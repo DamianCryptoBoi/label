@@ -65,6 +65,7 @@ describe("Exchange", function () {
             transactions,
             creators,
             royalties,
+            totalRoyalties,
             platformFeeRecipient,
             platformFee,
             moneyReceiver,
@@ -118,6 +119,7 @@ describe("Exchange", function () {
                 "/test",
                 creators,
                 royalties,
+                totalRoyalties,
                 "0x"
             ),
             erc20.mint(account_b.address, erc20MintAmount),
@@ -132,6 +134,7 @@ describe("Exchange", function () {
                 "/test",
                 creators,
                 royalties,
+                totalRoyalties,
                 "0x"
             );
 
@@ -253,28 +256,27 @@ describe("Exchange", function () {
         ]);
 
         const totalPay = sellingPrice * buyAmount * txCount;
-        const totalFee =
-            (totalPay * (royalties.reduce((a, b) => a + b) + platformFee)) /
-            10000;
+        const royaltyFeeAmount = (totalPay * totalRoyalties) / 10000;
+        const platformFeeAmount = (totalPay * platformFee) / 10000;
 
         for (let i = 0; i < creators.length; i++) {
             feeAmount = await erc20.balanceOf(creators[i]);
             assert.equal(
                 feeAmount.toNumber(),
-                (totalPay * royalties[i]) / 10000,
-                "Incorrect ERC20 balance"
+                (royaltyFeeAmount * royalties[i]) / 10000,
+                "Incorrect creator's ERC20 balance"
             );
         }
 
         assert.equal(
             mrBalance.toNumber(),
-            totalPay - totalFee,
-            "Incorrect ERC20 balance"
+            totalPay - royaltyFeeAmount - platformFeeAmount,
+            "Incorrect money receiver's ERC20 balance"
         );
 
         assert.equal(
             platformFeeRecipientBalance.toNumber(),
-            (totalPay * platformFee) / 10000,
+            platformFeeAmount,
             "Incorrect ERC20 balance"
         );
 
@@ -300,7 +302,8 @@ describe("Exchange", function () {
             account_b: accounts[6],
             sender: accounts[6],
             creators: [accounts[2].address, accounts[3].address],
-            royalties: [300, 200],
+            royalties: [6000, 4000],
+            totalRoyalties: 500,
             platformFeeRecipient: accounts[5].address,
             platformFee: 150,
             moneyReceiver: accounts[1].address,
@@ -321,7 +324,8 @@ describe("Exchange", function () {
             account_b: accounts[6],
             sender: accounts[6],
             creators: [accounts[2].address, accounts[3].address],
-            royalties: [300, 200],
+            royalties: [6000, 4000],
+            totalRoyalties: 500,
             platformFeeRecipient: accounts[5].address,
             platformFee: 150,
             moneyReceiver: accounts[4].address,
@@ -344,7 +348,8 @@ describe("Exchange", function () {
             account_b: accounts[6],
             sender: accounts[6],
             creators: [accounts[2].address, accounts[3].address],
-            royalties: [300, 200],
+            royalties: [6000, 4000],
+            totalRoyalties: 500,
             platformFeeRecipient: accounts[5].address,
             platformFee: 150,
             moneyReceiver: accounts[4].address,
@@ -369,7 +374,8 @@ describe("Exchange", function () {
             account_b: accounts[6],
             sender: accounts[6],
             creators: [accounts[2].address, accounts[3].address],
-            royalties: [300, 200],
+            royalties: [6000, 4000],
+            totalRoyalties: 500,
             platformFeeRecipient: accounts[5].address,
             platformFee: 150,
             moneyReceiver: accounts[4].address,
@@ -393,7 +399,8 @@ describe("Exchange", function () {
             account_b: accounts[6],
             sender: accounts[6],
             creators: [accounts[2].address, accounts[3].address],
-            royalties: [300, 200],
+            royalties: [6000, 4000],
+            totalRoyalties: 500,
             platformFeeRecipient: accounts[5].address,
             platformFee: 150,
             moneyReceiver: accounts[4].address,
@@ -418,7 +425,8 @@ describe("Exchange", function () {
             account_b: accounts[6],
             sender: accounts[6],
             creators: [accounts[2].address, accounts[3].address],
-            royalties: [300, 200],
+            royalties: [6000, 4000],
+            totalRoyalties: 500,
             platformFeeRecipient: accounts[5].address,
             platformFee: 150,
             moneyReceiver: accounts[4].address,
@@ -442,7 +450,8 @@ describe("Exchange", function () {
                 account_b: accounts[6],
                 sender: accounts[6],
                 creators: [accounts[2].address, accounts[3].address],
-                royalties: [300, 200],
+                royalties: [6000, 4000],
+                totalRoyalties: 500,
                 platformFeeRecipient: accounts[5].address,
                 platformFee: 150,
                 moneyReceiver: accounts[4].address,
@@ -468,7 +477,8 @@ describe("Exchange", function () {
                 account_b: accounts[6],
                 sender: accounts[6],
                 creators: [accounts[2].address, accounts[3].address],
-                royalties: [300, 200],
+                royalties: [6000, 4000],
+                totalRoyalties: 500,
                 platformFeeRecipient: accounts[5].address,
                 platformFee: 150,
                 moneyReceiver: accounts[4].address,
@@ -495,7 +505,8 @@ describe("Exchange", function () {
                 account_b: accounts[6],
                 sender: accounts[6],
                 creators: [accounts[2].address, accounts[3].address],
-                royalties: [300, 200],
+                royalties: [6000, 4000],
+                totalRoyalties: 500,
                 platformFeeRecipient: accounts[5].address,
                 platformFee: 150,
                 moneyReceiver: accounts[4].address,
@@ -523,7 +534,8 @@ describe("Exchange", function () {
                 account_b: accounts[6],
                 sender: accounts[6],
                 creators: [accounts[2].address, accounts[3].address],
-                royalties: [300, 200],
+                royalties: [6000, 4000],
+                totalRoyalties: 500,
                 platformFeeRecipient: accounts[5].address,
                 platformFee: 150,
                 moneyReceiver: accounts[4].address,
@@ -551,7 +563,8 @@ describe("Exchange", function () {
                 account_b: accounts[6],
                 sender: accounts[6],
                 creators: [accounts[2].address, accounts[3].address],
-                royalties: [300, 200],
+                royalties: [6000, 4000],
+                totalRoyalties: 500,
                 platformFeeRecipient: accounts[5].address,
                 platformFee: 150,
                 moneyReceiver: accounts[4].address,
@@ -578,7 +591,8 @@ describe("Exchange", function () {
                 account_b: accounts[6],
                 sender: accounts[6],
                 creators: [accounts[2].address, accounts[3].address],
-                royalties: [300, 200],
+                royalties: [6000, 4000],
+                totalRoyalties: 500,
                 platformFeeRecipient: accounts[5].address,
                 platformFee: 150,
                 moneyReceiver: accounts[4].address,
