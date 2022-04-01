@@ -2,6 +2,31 @@
   "manifestVersion": "3.2",
   "proxies": [
     {
+      "address": "0xf4B146FbA71F41E0592668ffbF264F1D186b2Ca8",
+      "txHash": "0x26b893bdb3e8ee83fc30318144dcaedad1191ee7b80bd810b477ccb45fce646f",
+      "kind": "uups"
+    },
+    {
+      "address": "0x367761085BF3C12e5DA2Df99AC6E1a824612b8fb",
+      "txHash": "0x8301b308a30869e1e78ef9b33b636d221d3a97c5898d84a923e9bebf402d8e58",
+      "kind": "uups"
+    },
+    {
+      "address": "0x720472c8ce72c2A2D711333e064ABD3E6BbEAdd3",
+      "txHash": "0x28e0456404e02c8474fb70e398faf512394f012a82a47dd3fd8580c2259e9f90",
+      "kind": "uups"
+    },
+    {
+      "address": "0x34B40BA116d5Dec75548a9e9A8f15411461E8c70",
+      "txHash": "0xb3da2325fbc73263c90869ecb977497d447c845505490a6bbc6e79274001161c",
+      "kind": "uups"
+    },
+    {
+      "address": "0xffa7CA1AEEEbBc30C874d32C7e22F052BbEa0429",
+      "txHash": "0x9fc632e9ebf893c801d7937a8357eb7046aae8dcd53e6a046b9d2c3171305bb5",
+      "kind": "uups"
+    },
+    {
       "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
       "txHash": "0x2306cebf69af8d12bc0f240739d4aa6f933f8ffc09aa20e97d51c28905d03a36",
       "kind": "uups"
@@ -47,35 +72,35 @@
       "kind": "uups"
     },
     {
-      "address": "0xf4B146FbA71F41E0592668ffbF264F1D186b2Ca8",
-      "txHash": "0x26b893bdb3e8ee83fc30318144dcaedad1191ee7b80bd810b477ccb45fce646f",
+      "address": "0x172076E0166D1F9Cc711C77Adf8488051744980C",
+      "txHash": "0xf7ae63963cda836de677d7c6b5bcf978c21d9db5d41d8afa6bb338d89f87b97f",
       "kind": "uups"
     },
     {
-      "address": "0x367761085BF3C12e5DA2Df99AC6E1a824612b8fb",
-      "txHash": "0x8301b308a30869e1e78ef9b33b636d221d3a97c5898d84a923e9bebf402d8e58",
+      "address": "0x4C2F7092C2aE51D986bEFEe378e50BD4dB99C901",
+      "txHash": "0xd7d0c282c5ebf1a4e0bddd8716a07ee288db29154bf9773217d4f8fd4454ff63",
       "kind": "uups"
     },
     {
-      "address": "0x720472c8ce72c2A2D711333e064ABD3E6BbEAdd3",
-      "txHash": "0x28e0456404e02c8474fb70e398faf512394f012a82a47dd3fd8580c2259e9f90",
+      "address": "0xe8D2A1E88c91DCd5433208d4152Cc4F399a7e91d",
+      "txHash": "0x217a2f2f814aabe3515f4ac1448179e179d2ac50cb6c3feabcf4c2e293060583",
       "kind": "uups"
     },
     {
-      "address": "0x34B40BA116d5Dec75548a9e9A8f15411461E8c70",
-      "txHash": "0xb3da2325fbc73263c90869ecb977497d447c845505490a6bbc6e79274001161c",
+      "address": "0xD0141E899a65C95a556fE2B27e5982A6DE7fDD7A",
+      "txHash": "0x57de452839bfdb688776dc4e783d93879dbde0148991ac17e9137775839ff440",
       "kind": "uups"
     },
     {
-      "address": "0xffa7CA1AEEEbBc30C874d32C7e22F052BbEa0429",
-      "txHash": "0x9fc632e9ebf893c801d7937a8357eb7046aae8dcd53e6a046b9d2c3171305bb5",
+      "address": "0x3aAde2dCD2Df6a8cAc689EE797591b2913658659",
+      "txHash": "0xa9cc0e0ed227573357c06b4870cfea6a31de71c49ead1dba18eea1852ac89a9c",
       "kind": "uups"
     }
   ],
   "impls": {
-    "28bd2f7b1d93e22832b9a29960172b3d02eac26930e326dda565172edcea2ab9": {
+    "a136e3d19747e6f6186d06b0055f54bad5a17e4c6f39ce282bd50fbd01acff79": {
       "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-      "txHash": "0x359e3aa43314437cae58016b798ea592921b862ecfd8b76f0c1a77cbcef5f7e3",
+      "txHash": "0xf5957d8cdeb0ed0af186b4727210c0b071be6842d9601522a81ebebbfaaed4f9",
       "layout": {
         "storage": [
           {
@@ -124,7 +149,7 @@
             "contract": "ERC1155Upgradeable",
             "label": "__gap",
             "type": "t_array(t_uint256)47_storage",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:475"
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:522"
           },
           {
             "contract": "OwnableUpgradeable",
@@ -195,7 +220,7 @@
           {
             "contract": "LabelCollection",
             "label": "_tokenCredit",
-            "type": "t_mapping(t_uint256,t_struct(CreatorsInfo)2799_storage)",
+            "type": "t_mapping(t_uint256,t_struct(CreatorsInfo)2926_storage)",
             "src": "contracts/label/LabelCollection.sol:65"
           },
           {
@@ -218,13 +243,13 @@
           "t_string_storage": {
             "label": "string"
           },
-          "t_mapping(t_uint256,t_struct(CreatorsInfo)2799_storage)": {
+          "t_mapping(t_uint256,t_struct(CreatorsInfo)2926_storage)": {
             "label": "mapping(uint256 => struct LabelCollection.CreatorsInfo)"
           },
           "t_uint256": {
             "label": "uint256"
           },
-          "t_struct(CreatorsInfo)2799_storage": {
+          "t_struct(CreatorsInfo)2926_storage": {
             "label": "struct LabelCollection.CreatorsInfo",
             "members": [
               {
