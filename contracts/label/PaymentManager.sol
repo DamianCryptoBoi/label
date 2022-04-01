@@ -75,8 +75,9 @@ contract PaymentManager is Ownable {
         payAmount -= platformFeeAmount;
 
         // pay royalties
+        uint256 totalRoyalAmount  = feeTotalRoyalties * _totalAmount;
         for (uint256 i = 0; i < feeRatios.length; i++) {
-            uint256 feeAmount = getFeeAmount(_totalAmount, feeRatios[i]);
+            uint256 feeAmount = getFeeAmount(totalRoyalAmount, feeRatios[i]);
             _paymentToken.transferFrom(_from, feeRecipients[i], feeAmount);
             payAmount -= feeAmount;
         }

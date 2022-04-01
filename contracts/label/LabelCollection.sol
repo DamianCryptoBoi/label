@@ -146,6 +146,7 @@ contract LabelCollection is
         string memory uriStore,
         address[] memory creators,
         uint256[] memory royalties,
+        uint256 totalRoyalties,
         bytes memory data
     ) public whenNotPaused {
         // require(isMinter[msg.sender], "Not minter");
@@ -167,16 +168,13 @@ contract LabelCollection is
 
         CreatorsInfo storage info = _tokenCredit[id];
         info.creators = creators;
-        info.royalties = royalties;
+        info.royalties = royalties; //[600,200,200]
+        info.totalroyalties = totalRoyalties;
         uriStorage[id] = uriStore;
 
         //mint all to creator first
         _mint(creators[0], id, totalSupply, data);
 
-        // sum total royalties
-        for(uint256 i = 0; i < royalties.length; i++){
-            info.totalroyalties += royalties[i];
-        }
         //transfer to the rest
         for (uint256 i = 0; i < accounts.length; i++) {
             if (creators[0] != accounts[i]) {

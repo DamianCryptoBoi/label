@@ -31,16 +31,18 @@ describe("Collection", function () {
     const predicatedId = getPredicateId(owner.address, 0, 100);
 
     await label1155.mint(
-      [addr1.address, addr2.address, owner.address],
+      [addr1.address, addr2.address, owner.address], // acount 
       [10, 20, 30], // amount
       100,
       predicatedId,
       "/abc",
       [owner.address, addr2.address,addr3.address],
-      [300,100,100], // total royal = 5% [600,200,200]
+      [600,200,200],
+      500,// total royal = 5% [600,200,200]
       "0x"
     );
-
+    // total amount * % each person => each's fees
+    // amount * TotalRoyalties => total royalties amount => * % each => each's fees
     expect(
       parseInt(await label1155.balanceOf(owner.address, predicatedId))
     ).to.be.equal(70);
@@ -51,11 +53,14 @@ describe("Collection", function () {
       parseInt(await label1155.balanceOf(addr2.address, predicatedId))
     ).to.be.equal(20);
     //
+
     [creators, royalties,totalroyalties] = await label1155.getCreditsInfo(predicatedId);
 
     expect(creators[0]).to.be.equal(owner.address);
-    expect(royalties[0].toNumber()).to.be.equal(300);
-
+    expect(royalties[0].toNumber()).to.be.equal(600);
+    expect(royalties[1].toNumber()).to.be.equal(200);
+    expect(royalties[2].toNumber()).to.be.equal(200);
+    expect(totalroyalties.toNumber()).to.be.equal(500);
     expect(await label1155.tokenUri(predicatedId)).to.be.equal("/test/abc");
 
     expect(await label1155.getTokenCreatorById(predicatedId)).to.be.equal(

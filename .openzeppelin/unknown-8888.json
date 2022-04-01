@@ -92,16 +92,6 @@
       "kind": "uups"
     },
     {
-      "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-      "txHash": "0xbee5b04829d39c54e3dc47e756e61f8ffd7ffd13272d0faf2765e9db035e79bb",
-      "kind": "uups"
-    },
-    {
-      "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-      "txHash": "0x19ae2dc32e79ca49bb358121efaa50978488bad94a37330c7cbd07e1935ed5c3",
-      "kind": "uups"
-    },
-    {
       "address": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
       "txHash": "0x14c9e66717e0e4bbfd70a9bbc250e96528706cffca683aba1ce6d9fa2265fcae",
       "kind": "uups"
@@ -159,6 +149,16 @@
     {
       "address": "0x3aAde2dCD2Df6a8cAc689EE797591b2913658659",
       "txHash": "0xabbf231a2c7425d946b59f783fd5d425879e5c8056a8af7562e47001287d2427",
+      "kind": "uups"
+    },
+    {
+      "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      "txHash": "0x2306cebf69af8d12bc0f240739d4aa6f933f8ffc09aa20e97d51c28905d03a36",
+      "kind": "uups"
+    },
+    {
+      "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+      "txHash": "0xe9995faccaa70b8714f6ab7eaf071de6e03ac5a90efda6d76454adeb7d55cde7",
       "kind": "uups"
     }
   ],
@@ -557,9 +557,9 @@
         }
       }
     },
-    "95cbc5550fb3fe0f76e725a92c48f8a8b438a7d4b04600318487120731f4b62c": {
+    "01804bcfe6fcb8a07857523a513e07213570c112d28ac73aaf1cd4133a4ae1e5": {
       "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-      "txHash": "0x7fc7098a9b672fc88506fe2d16f6cae5cc6278c47a120931ddb8180d3662fd49",
+      "txHash": "0x95bfbc1cedfb19ed54e074407a220f74f96a337a47f709bc1d79ba57f5d273c3",
       "layout": {
         "storage": [
           {
@@ -608,7 +608,7 @@
             "contract": "ERC1155Upgradeable",
             "label": "__gap",
             "type": "t_array(t_uint256)47_storage",
-            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:522"
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:475"
           },
           {
             "contract": "OwnableUpgradeable",
@@ -662,37 +662,37 @@
             "contract": "LabelCollection",
             "label": "proxyRegistryAddress",
             "type": "t_address",
-            "src": "contracts/label/LabelCollection.sol:61"
+            "src": "contracts/label/LabelCollection.sol:62"
           },
           {
             "contract": "LabelCollection",
             "label": "name",
             "type": "t_string_storage",
-            "src": "contracts/label/LabelCollection.sol:62"
+            "src": "contracts/label/LabelCollection.sol:63"
           },
           {
             "contract": "LabelCollection",
             "label": "symbol",
             "type": "t_string_storage",
-            "src": "contracts/label/LabelCollection.sol:63"
+            "src": "contracts/label/LabelCollection.sol:64"
           },
           {
             "contract": "LabelCollection",
             "label": "_tokenCredit",
-            "type": "t_mapping(t_uint256,t_struct(CreatorsInfo)4950_storage)",
-            "src": "contracts/label/LabelCollection.sol:64"
+            "type": "t_mapping(t_uint256,t_struct(CreatorsInfo)2799_storage)",
+            "src": "contracts/label/LabelCollection.sol:65"
           },
           {
             "contract": "LabelCollection",
             "label": "uriStorage",
             "type": "t_mapping(t_uint256,t_string_storage)",
-            "src": "contracts/label/LabelCollection.sol:65"
+            "src": "contracts/label/LabelCollection.sol:66"
           },
           {
             "contract": "LabelCollection",
             "label": "isMinter",
             "type": "t_mapping(t_address,t_bool)",
-            "src": "contracts/label/LabelCollection.sol:66"
+            "src": "contracts/label/LabelCollection.sol:67"
           }
         ],
         "types": {
@@ -702,13 +702,13 @@
           "t_string_storage": {
             "label": "string"
           },
-          "t_mapping(t_uint256,t_struct(CreatorsInfo)4950_storage)": {
+          "t_mapping(t_uint256,t_struct(CreatorsInfo)2799_storage)": {
             "label": "mapping(uint256 => struct LabelCollection.CreatorsInfo)"
           },
           "t_uint256": {
             "label": "uint256"
           },
-          "t_struct(CreatorsInfo)4950_storage": {
+          "t_struct(CreatorsInfo)2799_storage": {
             "label": "struct LabelCollection.CreatorsInfo",
             "members": [
               {
@@ -718,6 +718,10 @@
               {
                 "label": "royalties",
                 "type": "t_array(t_uint256)dyn_storage"
+              },
+              {
+                "label": "totalroyalties",
+                "type": "t_uint256"
               }
             ]
           },
