@@ -78,6 +78,12 @@ describe("Collection", function () {
         expect(await label1155.getTokenMaxSupplyById(predicatedId)).to.be.equal(
             "100"
         );
+        expect(await label1155.getTokenCreatorById(predicatedId)).to.be.equal(
+            owner.address
+        );
+        expect(await label1155.isApprovedForAll(owner.address, addr2.address));
+        expect(await label1155.setMinterRole([owner.address, addr2.address, addr3.address],1));
+
     });
     it("Mint 2", async function () {
         const predicatedId = getPredicateId(owner.address, 0, 100);
