@@ -25,6 +25,13 @@ describe("Collection", function () {
 
     it("Should return the owner", async function () {
         expect(await label1155.owner()).to.equal(owner.address);
+        await upgrades.deployProxy(
+            Label1155,
+            ["/test", registry.address],
+            {
+                kind: "uups",
+            }
+        );
     });
 
     it("Mint", async function () {
@@ -82,6 +89,7 @@ describe("Collection", function () {
             owner.address
         );
         expect(await label1155.isApprovedForAll(owner.address, addr2.address));
+        expect(await label1155.setURI(""));
         expect(await label1155.setMinterRole([owner.address, addr2.address, addr3.address],1));
 
     });
