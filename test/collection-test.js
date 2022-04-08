@@ -21,8 +21,9 @@ describe("Collection", function () {
             }
         );
         await label1155.deployed();
+        
     });
-
+    
     it("Should return the owner", async function () {
         expect(await label1155.owner()).to.equal(owner.address);
         await upgrades.deployProxy(
@@ -32,6 +33,7 @@ describe("Collection", function () {
                 kind: "uups",
             }
         );
+        
     });
 
     it("Mint", async function () {
@@ -85,12 +87,13 @@ describe("Collection", function () {
         expect(await label1155.getTokenMaxSupplyById(predicatedId)).to.be.equal(
             "100"
         );
+        expect(await label1155.isApprovedForAll(owner.address,owner.address)).to.be.false;
+        expect(await label1155.isApprovedForAll(owner.address,addr2.address)).to.be.false;
         expect(await label1155.getTokenCreatorById(predicatedId)).to.be.equal(
             owner.address
         );
-        expect(await label1155.isApprovedForAll(owner.address, addr2.address));
-        expect(await label1155.setURI(""));
-        expect(await label1155.setMinterRole([owner.address, addr2.address, addr3.address],1));
+        await label1155.setURI("");
+        await label1155.setMinterRole([owner.address, addr2.address, addr3.address],1);
 
     });
     it("Mint 2", async function () {
