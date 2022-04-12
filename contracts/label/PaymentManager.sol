@@ -114,14 +114,11 @@ contract PaymentManager is
 
         // pay platform fees
         uint256 platformFeeAmount = getFeeAmount(_totalAmount, platformFee);
+        address platformFeeHolder = platformFeeRecipient != address(0)
+            ? platformFeeRecipient
+            : address(this);
 
-        if (platformFeeRecipient != address(0)) {
-            _paymentToken.transferFrom(
-                _from,
-                platformFeeRecipient,
-                platformFeeAmount
-            );
-        }
+        _paymentToken.transferFrom(_from, platformFeeHolder, platformFeeAmount);
         payAmount -= platformFeeAmount;
 
         // pay royalties
