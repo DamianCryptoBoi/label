@@ -82,10 +82,12 @@ describe("Exchange", function () {
 
         const mr = moneyReceiver || account_a;
 
-        let payment = await PaymentManager.deploy(
-            erc1155.address,
-            platformFeeRecipient,
-            platformFee
+        let payment = await upgrades.deployProxy(
+            PaymentManager,
+            [erc1155.address, platformFeeRecipient, platformFee],
+            {
+                kind: "uups",
+            }
         );
 
         await payment.deployed();
