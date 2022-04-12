@@ -131,6 +131,7 @@ describe("Collection", function () {
             500,
             "0x"
         )).to.be.revertedWith("Invalid creators");
+        
         await expect(label1155.connect(addr2).mint(
             [addr1.address, addr2.address, owner.address], // acount 
             [10, 20,30], // amount
@@ -142,5 +143,29 @@ describe("Collection", function () {
             500,
             "0x"
         )).to.be.revertedWith( "Not minter");
+        await label1155.pause();
+        await expect(label1155.mint(
+            [addr1.address, addr2.address, owner.address], // acount 
+            [10, 20, 30], // amount
+            100,
+            predicatedId,
+            "/abc",
+            [owner.address, addr2.address, addr3.address],
+            [6000, 2000, 2000],
+            500,
+            "0x"
+        )).to.be.revertedWith( "Pausable: paused");
+        await label1155.unpause();
+        await label1155.mint(
+            [addr1.address, addr2.address, owner.address], // acount 
+            [10, 20, 30], // amount
+            100,
+            predicatedId,
+            "/abc",
+            [owner.address, addr2.address, addr3.address],
+            [6000, 2000, 2000],
+            500,
+            "0x"
+        );
     });
 });
