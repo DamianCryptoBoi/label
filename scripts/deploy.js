@@ -31,16 +31,18 @@ async function main() {
     platformFee = 250; // 2.5%
 
     PaymentManager = await ethers.getContractFactory("PaymentManager");
-    payment = await PaymentManager.deploy(
-        erc1155.address,
-        platformFeeRecipient,
-        platformFee
+    payment = await upgrades.deployProxy(
+        ERC1155,
+        [erc1155.address, platformFeeRecipient, platformFee],
+        {
+            kind: "uups",
+        }
     );
     await payment.deployed();
 
     console.log("PaymentManager: " + payment.address);
 
-    StaticMarket = await ethers.getContractFactory("StaticMarket");
+    StaticMarket = await ethers.getContractFactory("LabelStaticMarket");
     let statici = await StaticMarket.deploy(payment.address);
     await statici.deployed();
 

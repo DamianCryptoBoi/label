@@ -41,7 +41,7 @@ describe("Exchange", function () {
 
         PaymentManager = await ethers.getContractFactory("PaymentManager");
 
-        StaticMarket = await ethers.getContractFactory("StaticMarket");
+        StaticMarket = await ethers.getContractFactory("LabelStaticMarket");
 
         //settings
         await registry.grantInitialAuthentication(exchange.address);
