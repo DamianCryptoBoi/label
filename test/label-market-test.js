@@ -43,6 +43,9 @@ describe("Exchange", function () {
 
         StaticMarket = await ethers.getContractFactory("LabelStaticMarket");
 
+        statici = await StaticMarket.deploy();
+        await statici.deployed();
+
         //settings
         await registry.grantInitialAuthentication(exchange.address);
     });
@@ -91,9 +94,6 @@ describe("Exchange", function () {
         );
 
         await payment.deployed();
-
-        let statici = await StaticMarket.deploy(payment.address);
-        await statici.deployed();
 
         await registry.connect(account_a).registerProxy();
         let proxy1 = await registry
