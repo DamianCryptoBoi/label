@@ -51,11 +51,13 @@ contract PaymentManager is
     }
 
     function _setLabelCollection(address _labelCollection) internal {
+        require(_labelCollection != address(0), "invalid address");
         labelCollection = ILabelCollection(_labelCollection);
         emit LabelCollectionChanged(_labelCollection);
     }
 
     function _setPlatformFeeRecipient(address _platformFeeRecipient) internal {
+        require(_platformFeeRecipient != address(0), "invalid address");
         platformFeeRecipient = _platformFeeRecipient;
         emit PlatformFeeRecipientChanged(_platformFeeRecipient);
     }
@@ -114,11 +116,11 @@ contract PaymentManager is
 
         // pay platform fees
         uint256 platformFeeAmount = getFeeAmount(_totalAmount, platformFee);
-        address platformFeeHolder = platformFeeRecipient != address(0)
-            ? platformFeeRecipient
-            : address(this);
-
-        _paymentToken.transferFrom(_from, platformFeeHolder, platformFeeAmount);
+        _paymentToken.transferFrom(
+            _from,
+            platformFeeRecipient,
+            platformFeeAmount
+        );
         payAmount -= platformFeeAmount;
 
         // pay royalties
@@ -146,13 +148,6 @@ contract PaymentManager is
                 _amounts[i]
             );
         }
-    }
-
-    function withdrawFee(IERC20Upgradeable _paymentToken, address _receipient)
-        external
-    {
-        uint256 amount = _paymentToken.balanceOf(address(this));
-        _paymentToken.transferFrom(msg.sender, _receipient, amount);
     }
 
     function _authorizeUpgrade(address newImplementation)

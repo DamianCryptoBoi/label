@@ -4,11 +4,7 @@ pragma solidity 0.7.5;
 import "../wyvern/StaticMarket.sol";
 
 contract LabelStaticMarket is StaticMarket {
-    address public paymentManager;
-
-    constructor(address _paymentManager) {
-        paymentManager = _paymentManager;
-    }
+    constructor() {}
 
     function anyERC1155ForERC20SplitFee(
         bytes memory extra,
@@ -43,8 +39,7 @@ contract LabelStaticMarket is StaticMarket {
             "anyERC1155ForERC20: call target must equal address of token to give"
         );
         require(
-            addresses[5] == paymentManagerReceiver[0] &&
-                addresses[5] == paymentManager,
+            addresses[5] == paymentManagerReceiver[0],
             "anyERC1155ForERC20: countercall target must equal address of payment manager"
         );
 
@@ -114,8 +109,7 @@ contract LabelStaticMarket is StaticMarket {
             "anyERC20ForERC1155: denominator must be larger than zero"
         );
         require(
-            addresses[2] == paymentManagerReceiver[0] &&
-                addresses[2] == paymentManager,
+            addresses[2] == paymentManagerReceiver[0],
             "anyERC20ForERC1155: call target must equal address of payment manager"
         );
         require(
