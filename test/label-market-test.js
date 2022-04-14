@@ -46,7 +46,6 @@ describe("Exchange", function () {
 
         PaymentM = await PaymentManager.deploy();
         await PaymentM.deployed();
-
         // await erc20.mint(accounts[1].address, 1000000000000);
         await erc20.mint(accounts[0].address, 1000000000000);
         // await erc20.connect(accounts[1]).approve(PaymentM.address, 1000000000000);
@@ -299,24 +298,25 @@ describe("Exchange", function () {
             "Incorrect ERC1155 balance"
         );
 
-        // expect(await payment.setLabelCollection(accounts[1].address)).to.be.revertedWith("invalid address");
-        // await expect(payment.multiTransfer(erc20.address,[accounts_a.address,account_b.address],[1000])).to.be.revertedWith("invalid amounts");
         await payment.setLabelCollection(erc20.address);
         await payment.setPlatformFee(100);
-        expect(await payment.platformFee.toNumber()).to.equal(100));
-        await payment.pause();
-        await payment.unpause();
         await payment.setPlatformFeeRecipient(accounts[2].address);
         expect(payment.setLabelCollection(ZERO_ADDRESS)).to.be.revertedWith("invalid address");
-        await expect(payment.multiTransfer(erc20.address,[accounts[1].address,accounts[2].address],[10])).to.be.revertedWith("invalid amounts");;
+        expect(payment.setPlatformFeeRecipient(ZERO_ADDRESS)).to.be.revertedWith("invalid address");
+        await expect(payment.multiTransfer(erc20.address,[accounts[1].address,accounts[2].address],[10])).to.be.revertedWith("invalid amounts");
+
+
+		await erc20.approve(PaymentM.address, 1000000000000);
+        await payment.pause();
+        await expect(payment.multiTransfer(erc20.address,[accounts[1].address],[1])).to.be.revertedWith("Pausable: paused");;
+        await payment.unpause();
+        await payment.multiTransfer(erc20.address,[accounts[1].address],[0]);
     };
-    it("payment ", async () => {
-        // await erc20.connect(accounts[1]).approve(PaymentM.address, 1000);
+
+    it("payment ", async function()  {
         await PaymentM.multiTransfer(erc20.address,[accounts[1].address],[1]);
         expect((await erc20.balanceOf(accounts[1].address)).toNumber()).to.equal(1);
         await expect(PaymentM.multiTransfer(erc20.address,[accounts[1].address,accounts[2].address],[10])).to.be.revertedWith("invalid amounts");
-        // console.log(zeroAddress.address);
-        // console.log(ZERO_ADDRESS.address);
     });
     it("StaticMarket: matches erc1155 <> erc20 order, 1 fill", async () => {
         const price = 10000;
