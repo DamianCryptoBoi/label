@@ -1,6 +1,6 @@
 const { expect } = require("chai");
+const { zeroAddress } = require("ethereumjs-util");
 const { ethers, upgrades } = require("hardhat");
-
 const LabelCollectionA = artifacts.require("LabelCollection");
 const PaymentManagerA = artifacts.require("PaymentManager");
 
@@ -10,6 +10,7 @@ const {
     CHAIN_ID,
     assertIsRejected,
     getPredicateId,
+    ZERO_ADDRESS,
 } = require("./common/util");
 
 describe("Exchange", function () {
@@ -307,13 +308,16 @@ describe("Exchange", function () {
         await payment.unpause();
         await payment.setPlatformFeeRecipient(accounts[2].address);
         // await payment.multiTransfer(erc20.address,[accounts[1].address],[1]);
+        expect(payment.setLabelCollection(ZERO_ADDRESS)).to.be.revertedWith("invalid address");
         await expect(payment.multiTransfer(erc20.address,[accounts[1].address,accounts[2].address],[10])).to.be.revertedWith("invalid amounts");;
-        
     };
     it("payment ", async () => {
         // await erc20.connect(accounts[1]).approve(PaymentM.address, 1000);
         await PaymentM.multiTransfer(erc20.address,[accounts[1].address],[1]);
-        await expect(payment.multiTransfer(erc20.address,[accounts[1].address,accounts[2].address],[10])).to.be.revertedWith("invalid amounts");;
+        expect((await erc20.balanceOf(accounts[1].address)).toNumber()).to.equal(1);
+        await expect(PaymentM.multiTransfer(erc20.address,[accounts[1].address,accounts[2].address],[10])).to.be.revertedWith("invalid amounts");
+        // console.log(zeroAddress.address);
+        // console.log(ZERO_ADDRESS.address);
     });
     it("StaticMarket: matches erc1155 <> erc20 order, 1 fill", async () => {
         const price = 10000;
