@@ -303,11 +303,10 @@ describe("Exchange", function () {
         // await expect(payment.multiTransfer(erc20.address,[accounts_a.address,account_b.address],[1000])).to.be.revertedWith("invalid amounts");
         await payment.setLabelCollection(erc20.address);
         await payment.setPlatformFee(100);
-       
+        expect(await payment.platformFee.toNumber()).to.equal(100));
         await payment.pause();
         await payment.unpause();
         await payment.setPlatformFeeRecipient(accounts[2].address);
-        // await payment.multiTransfer(erc20.address,[accounts[1].address],[1]);
         expect(payment.setLabelCollection(ZERO_ADDRESS)).to.be.revertedWith("invalid address");
         await expect(payment.multiTransfer(erc20.address,[accounts[1].address,accounts[2].address],[10])).to.be.revertedWith("invalid amounts");;
     };
