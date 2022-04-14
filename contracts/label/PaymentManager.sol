@@ -67,16 +67,16 @@ contract PaymentManager is
         emit PlatformFeeChanged(_platformFee);
     }
 
-    function setLabelCollection(address _labelCollection) external onlyOwner {
-        _setLabelCollection(_labelCollection);
-    }
-
     function pause() public onlyOwner {
         _pause();
     }
 
     function unpause() public onlyOwner {
         _unpause();
+    }
+
+    function setLabelCollection(address _labelCollection) external onlyOwner {
+        _setLabelCollection(_labelCollection);
     }
 
     function setPlatformFeeRecipient(address _platformFeeRecipient)
