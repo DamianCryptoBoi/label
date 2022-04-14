@@ -297,6 +297,13 @@ describe("Exchange", function () {
             sellingNumerator || buyAmount * txCount,
             "Incorrect ERC1155 balance"
         );
+        await payment.payForNFT(
+            account_b.address,
+            mr,
+            0,
+            erc20.address,
+            10
+        );
 
         await payment.setLabelCollection(erc20.address);
         await payment.setPlatformFee(100);
@@ -304,8 +311,7 @@ describe("Exchange", function () {
         expect(payment.setLabelCollection(ZERO_ADDRESS)).to.be.revertedWith("invalid address");
         expect(payment.setPlatformFeeRecipient(ZERO_ADDRESS)).to.be.revertedWith("invalid address");
         await expect(payment.multiTransfer(erc20.address,[accounts[1].address,accounts[2].address],[10])).to.be.revertedWith("invalid amounts");
-
-
+        
 		await erc20.approve(PaymentM.address, 1000000000000);
         await payment.pause();
         await expect(payment.multiTransfer(erc20.address,[accounts[1].address],[1])).to.be.revertedWith("Pausable: paused");;
