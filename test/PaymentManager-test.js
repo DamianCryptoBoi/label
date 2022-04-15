@@ -1,6 +1,6 @@
 const { expect } = require("chai");
+const { zeroAddress } = require("ethereumjs-util");
 const { ethers, upgrades } = require("hardhat");
-
 const LabelCollectionA = artifacts.require("LabelCollection");
 const PaymentManagerA = artifacts.require("PaymentManager");
 
@@ -10,12 +10,15 @@ const {
     CHAIN_ID,
     assertIsRejected,
     getPredicateId,
+    ZERO_ADDRESS,
 } = require("./common/util");
 
 describe("Exchange", function () {
     beforeEach(async () => {
         accounts = await ethers.getSigners();
-
+        // for (const account of accounts) {
+        //     console.log(account.address);
+        // }
         Registry = await ethers.getContractFactory("WyvernRegistry");
         registry = await Registry.deploy();
         await registry.deployed();
@@ -28,7 +31,7 @@ describe("Exchange", function () {
         ERC20 = await ethers.getContractFactory("MockLabel");
         erc20 = await ERC20.deploy();
         await erc20.deployed();
-
+        
         ERC1155 = await ethers.getContractFactory("LabelCollection");
         erc1155 = await upgrades.deployProxy(
             ERC1155,
@@ -40,6 +43,13 @@ describe("Exchange", function () {
         await erc1155.deployed();
 
         PaymentManager = await ethers.getContractFactory("PaymentManager");
+
+        PaymentM = await PaymentManager.deploy();
+        await PaymentM.deployed();
+        // await erc20.mint(accounts[1].address, 1000000000000);
+        await erc20.mint(accounts[0].address, 1000000000000);
+        // await erc20.connect(accounts[1]).approve(PaymentM.address, 1000000000000);
+		await erc20.connect(accounts[0]).approve(PaymentM.address, 1000000000000);
 
         StaticMarket = await ethers.getContractFactory("LabelStaticMarket");
 
@@ -287,8 +297,33 @@ describe("Exchange", function () {
             sellingNumerator || buyAmount * txCount,
             "Incorrect ERC1155 balance"
         );
+        await payment.payForNFT(
+            account_b.address,
+            mr,
+            0,
+            erc20.address,
+            10
+        );
+
+        await payment.setLabelCollection(erc20.address);
+        await payment.setPlatformFee(100);
+        await payment.setPlatformFeeRecipient(accounts[2].address);
+        expect(payment.setLabelCollection(ZERO_ADDRESS)).to.be.revertedWith("invalid address");
+        expect(payment.setPlatformFeeRecipient(ZERO_ADDRESS)).to.be.revertedWith("invalid address");
+        await expect(payment.multiTransfer(erc20.address,[accounts[1].address,accounts[2].address],[10])).to.be.revertedWith("invalid amounts");
+        
+		await erc20.approve(PaymentM.address, 1000000000000);
+        await payment.pause();
+        await expect(payment.multiTransfer(erc20.address,[accounts[1].address],[1])).to.be.revertedWith("Pausable: paused");;
+        await payment.unpause();
+        await payment.multiTransfer(erc20.address,[accounts[1].address],[0]);
     };
 
+    it("payment ", async function()  {
+        await PaymentM.multiTransfer(erc20.address,[accounts[1].address],[1]);
+        expect((await erc20.balanceOf(accounts[1].address)).toNumber()).to.equal(1);
+        await expect(PaymentM.multiTransfer(erc20.address,[accounts[1].address,accounts[2].address],[10])).to.be.revertedWith("invalid amounts");
+    });
     it("StaticMarket: matches erc1155 <> erc20 order, 1 fill", async () => {
         const price = 10000;
 

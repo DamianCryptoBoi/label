@@ -49,7 +49,7 @@ contract PaymentManager is
         _setPlatformFee(_platformFee);
         feeDenominator = 10000;
     }
-
+    
     function _setLabelCollection(address _labelCollection) internal {
         require(_labelCollection != address(0), "invalid address");
         labelCollection = ILabelCollection(_labelCollection);

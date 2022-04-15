@@ -1287,7 +1287,7 @@
     },
     "7bbf1148490046d2a067b4240bbcb182eb27af760fa7a048fe4aa54f8f649e35": {
       "address": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
-      "txHash": "0x7fdab231bebe4e35c11af5fbb704df58463bb56861a66f5b3005782682b87185",
+      "txHash": "0xfe5fc8a6f1598e68d069a88a81387f605633bfd8ad6171afe44166c310cb8747",
       "layout": {
         "storage": [
           {
@@ -1347,7 +1347,7 @@
           {
             "contract": "PaymentManager",
             "label": "labelCollection",
-            "type": "t_contract(ILabelCollection)4900",
+            "type": "t_contract(ILabelCollection)1283",
             "src": "contracts/label/PaymentManager.sol:31"
           },
           {
@@ -1370,7 +1370,7 @@
           }
         ],
         "types": {
-          "t_contract(ILabelCollection)4900": {
+          "t_contract(ILabelCollection)1283": {
             "label": "contract ILabelCollection"
           },
           "t_address": {
