@@ -49,7 +49,7 @@ contract PaymentManager is
         _setPlatformFee(_platformFee);
         feeDenominator = 10000;
     }
-    
+
     function _setLabelCollection(address _labelCollection) internal {
         require(_labelCollection != address(0), "invalid address");
         labelCollection = ILabelCollection(_labelCollection);
@@ -111,7 +111,6 @@ contract PaymentManager is
         (feeRecipients, feeRatios, totalRoyalties) = labelCollection
             .getCreditsInfo(_nftId);
 
-        require(feeRecipients.length == feeRatios.length, "invalid fee info");
         uint256 payAmount = _totalAmount;
 
         // pay platform fees
