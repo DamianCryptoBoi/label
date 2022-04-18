@@ -41,7 +41,10 @@ describe("Exchange", function () {
 
         PaymentManager = await ethers.getContractFactory("PaymentManager");
 
-        StaticMarket = await ethers.getContractFactory("StaticMarket");
+        StaticMarket = await ethers.getContractFactory("LabelStaticMarket");
+
+        statici = await StaticMarket.deploy();
+        await statici.deployed();
 
         //settings
         await registry.grantInitialAuthentication(exchange.address);
@@ -82,16 +85,15 @@ describe("Exchange", function () {
 
         const mr = moneyReceiver || account_a;
 
-        let payment = await PaymentManager.deploy(
-            erc1155.address,
-            platformFeeRecipient,
-            platformFee
+        let payment = await upgrades.deployProxy(
+            PaymentManager,
+            [erc1155.address, platformFeeRecipient, platformFee],
+            {
+                kind: "uups",
+            }
         );
 
         await payment.deployed();
-
-        let statici = await StaticMarket.deploy(payment.address);
-        await statici.deployed();
 
         await registry.connect(account_a).registerProxy();
         let proxy1 = await registry

@@ -2,6 +2,8 @@ const { ethers, upgrades, network } = require("hardhat");
 
 const CHAIN_ID = network.config.chainId;
 
+const FEE_RECEIVER = "0x28f89275cD7Ce2576d467BC85Fe42fE2324B2212";
+
 async function main() {
     console.log("-----------DEPLOYMENT STARTED-----------");
 
@@ -27,21 +29,23 @@ async function main() {
 
     console.log("LabelCollection: " + erc1155.address);
 
-    platformFeeRecipient = await erc1155.owner();
+    platformFeeRecipient = FEE_RECEIVER;
     platformFee = 250; // 2.5%
 
     PaymentManager = await ethers.getContractFactory("PaymentManager");
-    payment = await PaymentManager.deploy(
-        erc1155.address,
-        platformFeeRecipient,
-        platformFee
+    payment = await upgrades.deployProxy(
+        PaymentManager,
+        [erc1155.address, platformFeeRecipient, platformFee],
+        {
+            kind: "uups",
+        }
     );
     await payment.deployed();
 
     console.log("PaymentManager: " + payment.address);
 
-    StaticMarket = await ethers.getContractFactory("StaticMarket");
-    let statici = await StaticMarket.deploy(payment.address);
+    StaticMarket = await ethers.getContractFactory("LabelStaticMarket");
+    let statici = await StaticMarket.deploy();
     await statici.deployed();
 
     console.log("StaticMarket: " + statici.address);
