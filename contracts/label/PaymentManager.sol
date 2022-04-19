@@ -67,16 +67,16 @@ contract PaymentManager is
         emit PlatformFeeChanged(_platformFee);
     }
 
-    function setLabelCollection(address _labelCollection) external onlyOwner {
-        _setLabelCollection(_labelCollection);
-    }
-
     function pause() public onlyOwner {
         _pause();
     }
 
     function unpause() public onlyOwner {
         _unpause();
+    }
+
+    function setLabelCollection(address _labelCollection) external onlyOwner {
+        _setLabelCollection(_labelCollection);
     }
 
     function setPlatformFeeRecipient(address _platformFeeRecipient)
@@ -111,7 +111,6 @@ contract PaymentManager is
         (feeRecipients, feeRatios, totalRoyalties) = labelCollection
             .getCreditsInfo(_nftId);
 
-        require(feeRecipients.length == feeRatios.length, "invalid fee info");
         uint256 payAmount = _totalAmount;
 
         // pay platform fees

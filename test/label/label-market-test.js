@@ -10,7 +10,7 @@ const {
     CHAIN_ID,
     assertIsRejected,
     getPredicateId,
-} = require("./common/util");
+} = require("../common/util");
 
 describe("Exchange", function () {
     beforeEach(async () => {
