@@ -4,6 +4,6 @@ const WyvernAtomicizer = artifacts.require('WyvernAtomicizer')
 
 contract('WyvernAtomicizer',() => {
   it('should be deployed',async () => {
-    return await WyvernAtomicizer.deployed()
+    return await WyvernAtomicizer.new()
   })
 })

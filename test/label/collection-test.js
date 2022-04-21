@@ -110,6 +110,17 @@ describe("Collection", function () {
                 "0x"
             )
         ).to.be.revertedWith("Invalid accounts");
+        await expect(label1155.mint(
+            [addr1.address, addr2.address, owner.address], // acount
+            [10, 20, 30], // amount
+            100,
+            predicatedId,
+            "/abc",
+            [owner.address, addr2.address, addr3.address],
+            [6010, 2000, 2000],
+            500,
+            "0x"
+        )).to.be.revertedWith("Invalid royalties");
         await expect(
             label1155.mint(
                 [addr1.address, addr2.address, owner.address], // acount

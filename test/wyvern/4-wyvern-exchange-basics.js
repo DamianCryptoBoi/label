@@ -3,11 +3,14 @@
 const WyvernExchange = artifacts.require('WyvernExchange')
 const WyvernRegistry = artifacts.require('WyvernRegistry')
 
-const {wrap, hashOrder, hashToSign, ZERO_ADDRESS, ZERO_BYTES32, CHAIN_ID, assertIsRejected} = require('./util')
+const {wrap, hashOrder, hashToSign, ZERO_ADDRESS, ZERO_BYTES32, CHAIN_ID, assertIsRejected} = require("../common/util")
 
 contract('WyvernExchange',accounts => {
   const withExchangeAndRegistry = async () => {
-    let [exchange,registry] = await Promise.all([WyvernExchange.deployed(),WyvernRegistry.deployed()])
+    const prefix = Buffer.from("\x19Bogus Signed Message:\n",'binary');
+    let registry = await WyvernRegistry.new()
+    let exchange = await WyvernExchange.new(CHAIN_ID,[registry.address],prefix)
+    // let [exchange,registry] = await Promise.all([WyvernExchange.new(CHAIN_ID,[registry.address],prefix),WyvernRegistry.new()])
     return {exchange: wrap(exchange),registry}
   }
 
