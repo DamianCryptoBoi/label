@@ -300,7 +300,7 @@ contract('WyvernExchange', (accounts) =>
 		const firstCall = {target: atomicizer.address, howToCall: 1, data: firstData}
 		const secondCall = {target: atomicizer.address, howToCall: 1, data: secondData}
 
-		let twoSig = NULL_SIG
+		let twoSig = await exchange.sign(two, account_b)
 		
 		for (let i = 0 ; i < fillCount ; ++i)
 			await exchange.atomicMatchWith(one, sig, firstCall, two, twoSig, secondCall, ZERO_BYTES32,{from:account_b})
