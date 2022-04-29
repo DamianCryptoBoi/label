@@ -281,6 +281,7 @@ const wrap = (inst) => {
     };
     obj.sign = (order, account) => {
         const str = structToSign(order, inst.address);
+        
         return web3
             .signTypedData(account, {
                 types: {

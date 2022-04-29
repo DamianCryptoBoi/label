@@ -13,14 +13,19 @@ const TestERC1271 = artifacts.require('TestERC1271')
 // const web3 = new Web3(provider)
 
 const { wrap,hashOrder,ZERO_BYTES32,randomUint,NULL_SIG,assertIsRejected} = require("../common/util")
-
+const {CHAIN_ID} = require("../common/util")
 contract('WyvernExchange', (accounts) => {
+  const prefix = Buffer.from("\x19Bogus Signed Message:\n",'binary');
   const deploy = async contracts => Promise.all(contracts.map(contract => contract.new()))
-
+  //CHAIN_ID,[registry.address],'0x'
   const withContracts = async () =>
     {
-    let [exchange,statici,registry,atomicizer,erc20,erc721,erc1271] = await deploy(
-      [WyvernExchange,WyvernStatic,WyvernRegistry,WyvernAtomicizer,TestERC20,TestERC721,TestERC1271])
+      let registry = await WyvernRegistry.new()
+      let exchange = await WyvernExchange.new(CHAIN_ID,[registry.address],prefix); 
+      let Atomicizer = await WyvernAtomicizer.new();
+      let  statici = await WyvernStatic.new(Atomicizer.address);
+      let [atomicizer,erc20,erc721,erc1271] = await deploy(
+      [WyvernAtomicizer,TestERC20,TestERC721,TestERC1271])
     return {exchange:wrap(exchange),statici,registry,atomicizer,erc20,erc721,erc1271}
     }
 
@@ -81,6 +86,7 @@ contract('WyvernExchange', (accounts) => {
   it('matches any-any nop order',async () => {
     let {exchange, registry, statici} = await withContracts()
     const selector = web3.eth.abi.encodeFunctionSignature('any(bytes,address[7],uint8[2],uint256[6],bytes,bytes)')
+    
     const one = {registry: registry.address, maker: accounts[0], staticTarget: statici.address, staticSelector: selector, staticExtradata: '0x', maximumFill: '1', listingTime: '0', expirationTime: '100000000000', salt: '0'}
     const two = {registry: registry.address, maker: accounts[0], staticTarget: statici.address, staticSelector: selector, staticExtradata: '0x', maximumFill: '1', listingTime: '0', expirationTime: '100000000000', salt: '1'}
     const call = {target: statici.address, howToCall: 0, data: web3.eth.abi.encodeFunctionSignature('test()')}
