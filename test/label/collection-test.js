@@ -177,4 +177,62 @@ describe("Collection", function () {
             "0x"
         );
     });
+
+    it("safeMultiTransferFrom", async function () {
+        const predicatedId = getPredicateId(owner.address, 0, 100);
+
+        await label1155.mint(
+            [owner.address], // acount
+            [100], // amount
+            100,
+            predicatedId,
+            "/abc",
+            [owner.address],
+            [10000],
+            500,
+            "0x"
+        );
+
+        const predicatedId1 = getPredicateId(owner.address, 1, 100);
+
+        await label1155.mint(
+            [owner.address], // acount
+            [100], // amount
+            100,
+            predicatedId1,
+            "/abc",
+            [owner.address],
+            [10000],
+            500,
+            "0x"
+        );
+
+        await label1155.safeMultiTransferFrom(
+            owner.address,
+            [addr1.address, addr2.address],
+            [predicatedId, predicatedId1],
+            [100, 100],
+            "0x"
+        );
+
+        await expect(
+            label1155
+                .connect(addr1)
+                .safeMultiTransferFrom(
+                    owner.address,
+                    [addr1.address, addr2.address],
+                    [predicatedId, predicatedId1],
+                    [100, 100],
+                    "0x"
+                )
+        ).to.be.reverted;
+
+        expect(
+            (await label1155.balanceOf(addr1.address, predicatedId)).toNumber()
+        ).to.equal(100);
+
+        expect(
+            (await label1155.balanceOf(addr2.address, predicatedId1)).toNumber()
+        ).to.equal(100);
+    });
 });

@@ -71,7 +71,6 @@ describe("Exchange", function () {
             totalRoyalties,
             platformFeeRecipient,
             platformFee,
-            moneyReceiver,
         } = options;
 
         id = getPredicateId(creators[0], tokenId, erc1155MintAmount);
@@ -83,7 +82,7 @@ describe("Exchange", function () {
 
         const txCount = transactions || 1;
 
-        const mr = moneyReceiver || account_a;
+        const mr = account_a.address;
 
         let payment = await upgrades.deployProxy(
             PaymentManager,
@@ -151,26 +150,26 @@ describe("Exchange", function () {
         );
 
         const selectorOne = web3.eth.abi.encodeFunctionSignature(
-            "anyERC1155ForERC20SplitFee(bytes,address[7],uint8[2],uint256[6],bytes,bytes)"
+            "anyERC1155ForERC20SplitFeeDirect(bytes,address[7],uint8[2],uint256[6],bytes,bytes)"
         );
         const selectorTwo = web3.eth.abi.encodeFunctionSignature(
-            "anyERC20ForERC1155SplitFee(bytes,address[7],uint8[2],uint256[6],bytes,bytes)"
+            "anyERC20ForERC1155SplitFeeDirect(bytes,address[7],uint8[2],uint256[6],bytes,bytes)"
         );
 
         const paramsOne = web3.eth.abi.encodeParameters(
-            ["address[2]", "address[2]", "uint256[3]"],
+            ["address[2]", "address", "uint256[3]"],
             [
                 [erc1155.address, erc20.address],
-                [payment.address, mr],
+                payment.address,
                 [id, sellingNumerator || 1, sellingPrice],
             ]
         );
 
         const paramsTwo = web3.eth.abi.encodeParameters(
-            ["address[2]", "address[2]", "uint256[3]"],
+            ["address[2]", "address", "uint256[3]"],
             [
                 [erc20.address, erc1155.address],
-                [payment.address, mr],
+                payment.address,
                 [buyTokenId ? bid : id, buyingPrice, buyingDenominator || 1],
             ]
         );
@@ -308,7 +307,6 @@ describe("Exchange", function () {
             totalRoyalties: 500,
             platformFeeRecipient: accounts[5].address,
             platformFee: 150,
-            moneyReceiver: accounts[1].address,
         });
     });
     it("StaticMarket: matches erc1155 <> erc20 order, 1 fill", async () => {
@@ -330,7 +328,6 @@ describe("Exchange", function () {
             totalRoyalties: 500,
             platformFeeRecipient: accounts[5].address,
             platformFee: 150,
-            moneyReceiver: accounts[4].address,
         });
     });
 
@@ -354,7 +351,6 @@ describe("Exchange", function () {
             totalRoyalties: 500,
             platformFeeRecipient: accounts[5].address,
             platformFee: 150,
-            moneyReceiver: accounts[4].address,
         });
     });
 
@@ -380,7 +376,6 @@ describe("Exchange", function () {
             totalRoyalties: 500,
             platformFeeRecipient: accounts[5].address,
             platformFee: 150,
-            moneyReceiver: accounts[4].address,
         });
     });
 
@@ -405,7 +400,6 @@ describe("Exchange", function () {
             totalRoyalties: 500,
             platformFeeRecipient: accounts[5].address,
             platformFee: 150,
-            moneyReceiver: accounts[4].address,
         });
     });
 
@@ -431,7 +425,6 @@ describe("Exchange", function () {
             totalRoyalties: 500,
             platformFeeRecipient: accounts[5].address,
             platformFee: 150,
-            moneyReceiver: accounts[4].address,
         });
     });
 
@@ -456,7 +449,6 @@ describe("Exchange", function () {
                 totalRoyalties: 500,
                 platformFeeRecipient: accounts[5].address,
                 platformFee: 150,
-                moneyReceiver: accounts[4].address,
             }),
             /First order has invalid parameters/,
             "Order should not match the second time."
@@ -483,7 +475,6 @@ describe("Exchange", function () {
                 totalRoyalties: 500,
                 platformFeeRecipient: accounts[5].address,
                 platformFee: 150,
-                moneyReceiver: accounts[4].address,
             }),
             /Static call failed/,
             "Order should not match."
@@ -511,7 +502,6 @@ describe("Exchange", function () {
                 totalRoyalties: 500,
                 platformFeeRecipient: accounts[5].address,
                 platformFee: 150,
-                moneyReceiver: accounts[4].address,
             }),
             /Static call failed/,
             "Order should not match."
@@ -540,7 +530,6 @@ describe("Exchange", function () {
                 totalRoyalties: 500,
                 platformFeeRecipient: accounts[5].address,
                 platformFee: 150,
-                moneyReceiver: accounts[4].address,
             }),
             /First call failed/,
             "Order should not fill"
@@ -569,7 +558,6 @@ describe("Exchange", function () {
                 totalRoyalties: 500,
                 platformFeeRecipient: accounts[5].address,
                 platformFee: 150,
-                moneyReceiver: accounts[4].address,
             }),
             /Second call failed/,
             "Order should not fill"
@@ -597,7 +585,6 @@ describe("Exchange", function () {
                 totalRoyalties: 500,
                 platformFeeRecipient: accounts[5].address,
                 platformFee: 150,
-                moneyReceiver: accounts[4].address,
             }),
             /Static call failed/,
             "Order should not match the second time."

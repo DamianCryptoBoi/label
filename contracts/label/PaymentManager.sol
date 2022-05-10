@@ -32,6 +32,12 @@ contract PaymentManager is
     event PlatformFeeRecipientChanged(address feeRecipient);
     event PlatformFeeChanged(uint256 fee);
     event LabelCollectionChanged(address labelCollection);
+    event PayToSeller(
+        address from,
+        address paymentToken,
+        uint256 amount,
+        uint256 tokenId
+    );
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -132,6 +138,7 @@ contract PaymentManager is
 
         //transfer to seller
         _paymentToken.transferFrom(_from, _to, payAmount);
+        emit PayToSeller(_from, address(_paymentToken), payAmount, _nftId);
     }
 
     function multiTransfer(
