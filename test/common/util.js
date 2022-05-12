@@ -308,6 +308,111 @@ const wrap = (inst) => {
     return obj;
 };
 
+const encodeMatchingCall = (
+    order,
+    sig,
+    call,
+    counterorder,
+    countersig,
+    countercall
+) => {
+    return web3.eth.abi.encodeFunctionCall(
+        {
+            name: "atomicMatch_",
+            outputs: [],
+            stateMutability: "payable",
+            type: "function",
+            inputs: [
+                {
+                    internalType: "uint256[16]",
+                    name: "uints",
+                    type: "uint256[16]",
+                },
+                {
+                    internalType: "bytes4[2]",
+                    name: "staticSelectors",
+                    type: "bytes4[2]",
+                },
+                {
+                    internalType: "bytes",
+                    name: "firstExtradata",
+                    type: "bytes",
+                },
+                {
+                    internalType: "bytes",
+                    name: "firstCalldata",
+                    type: "bytes",
+                },
+                {
+                    internalType: "bytes",
+                    name: "secondExtradata",
+                    type: "bytes",
+                },
+                {
+                    internalType: "bytes",
+                    name: "secondCalldata",
+                    type: "bytes",
+                },
+                {
+                    internalType: "uint8[2]",
+                    name: "howToCalls",
+                    type: "uint8[2]",
+                },
+                {
+                    internalType: "bytes32",
+                    name: "metadata",
+                    type: "bytes32",
+                },
+                {
+                    internalType: "bytes",
+                    name: "signatures",
+                    type: "bytes",
+                },
+            ],
+        },
+        [
+            [
+                order.registry,
+                order.maker,
+                order.staticTarget,
+                order.maximumFill,
+                order.listingTime,
+                order.expirationTime,
+                order.salt,
+                call.target,
+                counterorder.registry,
+                counterorder.maker,
+                counterorder.staticTarget,
+                counterorder.maximumFill,
+                counterorder.listingTime,
+                counterorder.expirationTime,
+                counterorder.salt,
+                countercall.target,
+            ],
+            [order.staticSelector, counterorder.staticSelector],
+            order.staticExtradata,
+            call.data,
+            counterorder.staticExtradata,
+            countercall.data,
+            [call.howToCall, countercall.howToCall],
+            ZERO_BYTES32,
+            web3.eth.abi.encodeParameters(
+                ["bytes", "bytes"],
+                [
+                    web3.eth.abi.encodeParameters(
+                        ["uint8", "bytes32", "bytes32"],
+                        [sig.v, sig.r, sig.s]
+                    ) + (sig.suffix || ""),
+                    web3.eth.abi.encodeParameters(
+                        ["uint8", "bytes32", "bytes32"],
+                        [countersig.v, countersig.r, countersig.s]
+                    ) + (countersig.suffix || ""),
+                ]
+            ),
+        ]
+    );
+};
+
 const randomUint = () => {
     return Math.floor(Math.random() * 1e10);
 };
@@ -405,6 +510,7 @@ module.exports = {
     wrap,
     randomUint,
     getPredicateId,
+    encodeMatchingCall,
     ZERO_ADDRESS,
     ZERO_BYTES32,
     NULL_SIG,

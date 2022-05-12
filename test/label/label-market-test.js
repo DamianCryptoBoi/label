@@ -10,6 +10,7 @@ const {
     CHAIN_ID,
     assertIsRejected,
     getPredicateId,
+    encodeMatchingCall,
 } = require("../common/util");
 
 describe("Exchange", function () {
@@ -24,6 +25,10 @@ describe("Exchange", function () {
         ex = await Exchange.deploy(CHAIN_ID, [registry.address], "0x");
         await ex.deployed();
         exchange = wrap(ex);
+
+        MatchingMachine = await ethers.getContractFactory("MatchingMachine");
+        matchingMachine = await MatchingMachine.deploy(ex.address);
+        await matchingMachine.deployed();
 
         ERC20 = await ethers.getContractFactory("MockLabel");
         erc20 = await ERC20.deploy();
@@ -232,7 +237,28 @@ describe("Exchange", function () {
 
         let sigOne = await exchange.sign(one, account_a.address);
 
-        for (var i = 0; i < txCount; ++i) {
+        if (txCount > 1) {
+            let matchingData = [];
+
+            for (var i = 0; i < txCount; ++i) {
+                let sigTwo = await exchange.sign(two, account_b.address);
+
+                data = await encodeMatchingCall(
+                    one,
+                    sigOne,
+                    firstCall,
+                    two,
+                    sigTwo,
+                    secondCall
+                );
+                matchingData.push(data);
+                two.salt++;
+            }
+
+            await expect(matchingMachine.multiMatch(1, matchingData))
+                .to.emit(matchingMachine, "MultiMatched")
+                .withArgs(1, Array(txCount).fill(true));
+        } else {
             let sigTwo = await exchange.sign(two, account_b.address);
             await exchange.atomicMatchWith(
                 one,
@@ -243,7 +269,6 @@ describe("Exchange", function () {
                 secondCall,
                 ZERO_BYTES32
             );
-            two.salt++;
         }
 
         let [
@@ -355,10 +380,10 @@ describe("Exchange", function () {
     });
 
     it("StaticMarket: matches erc1155 <> erc20 order, multiple fills in multiple transactions", async () => {
-        const nftAmount = 3;
-        const buyAmount = 1;
+        const nftAmount = 100;
+        const buyAmount = 10;
         const price = 10000;
-        const transactions = 3;
+        const transactions = 10;
 
         return test({
             tokenId: 5,
@@ -376,6 +401,7 @@ describe("Exchange", function () {
             totalRoyalties: 500,
             platformFeeRecipient: accounts[5].address,
             platformFee: 150,
+            transactions,
         });
     });
 
@@ -450,8 +476,8 @@ describe("Exchange", function () {
                 platformFeeRecipient: accounts[5].address,
                 platformFee: 150,
             }),
-            /First order has invalid parameters/,
-            "Order should not match the second time."
+
+            "expected false to equal true"
         );
     });
 
