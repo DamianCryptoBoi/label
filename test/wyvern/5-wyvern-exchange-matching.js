@@ -7,6 +7,7 @@ const WyvernRegistry = artifacts.require("WyvernRegistry");
 const TestERC20 = artifacts.require("TestERC20");
 const TestERC721 = artifacts.require("TestERC721");
 const TestERC1271 = artifacts.require("TestERC1271");
+const TestSmartContractWallet = artifacts.require("TestSmartContractWallet");
 
 // const Web3 = require('web3')
 // const provider = new Web3.providers.HttpProvider('http://localhost:8545')
@@ -22,25 +23,26 @@ const {
 } = require("../common/util");
 const { CHAIN_ID } = require("../common/util");
 contract("WyvernExchange", (accounts) => {
-    const prefix = Buffer.from("\x19Bogus Signed Message:\n", "binary");
     const deploy = async (contracts) =>
         Promise.all(contracts.map((contract) => contract.new()));
-    //CHAIN_ID,[registry.address],'0x'
+
     const withContracts = async () => {
         let registry = await WyvernRegistry.new();
         let exchange = await WyvernExchange.new(
             CHAIN_ID,
             [registry.address],
-            prefix
+            "0x"
         );
         let Atomicizer = await WyvernAtomicizer.new();
         let statici = await WyvernStatic.new(Atomicizer.address);
-        let [atomicizer, erc20, erc721, erc1271] = await deploy([
-            WyvernAtomicizer,
-            TestERC20,
-            TestERC721,
-            TestERC1271,
-        ]);
+        let [atomicizer, erc20, erc721, erc1271, smartContractWallet] =
+            await deploy([
+                WyvernAtomicizer,
+                TestERC20,
+                TestERC721,
+                TestERC1271,
+                TestSmartContractWallet,
+            ]);
         return {
             exchange: wrap(exchange),
             statici,
@@ -49,6 +51,7 @@ contract("WyvernExchange", (accounts) => {
             erc20,
             erc721,
             erc1271,
+            smartContractWallet,
         };
     };
 
@@ -122,7 +125,6 @@ contract("WyvernExchange", (accounts) => {
         const selector = web3.eth.abi.encodeFunctionSignature(
             "any(bytes,address[7],uint8[2],uint256[6],bytes,bytes)"
         );
-
         const one = {
             registry: registry.address,
             maker: accounts[0],
@@ -1753,6 +1755,94 @@ contract("WyvernExchange", (accounts) => {
                 ZERO_BYTES32,
                 { value: 200 }
             )
+        );
+    });
+
+    it("allows proxy registration for smart contract", async () => {
+        let { registry, erc721, smartContractWallet } = await withContracts();
+        // this registration carries over to the following test and is necessary for the value exchange.
+        await smartContractWallet.registerProxy(registry.address, {
+            from: accounts[6],
+        });
+        let proxy = await registry.proxies(smartContractWallet.address);
+        assert.isTrue(proxy.length > 0, "No proxy address");
+        assert.isOk(
+            await smartContractWallet.setApprovalForAll(
+                proxy,
+                erc721.address,
+                true,
+                { from: accounts[6] }
+            )
+        );
+    });
+
+    it("should match with approvals and value to contract", async () => {
+        const value = 200;
+        let { exchange, registry, statici, smartContractWallet } =
+            await withContracts();
+        const selector = web3.eth.abi.encodeFunctionSignature(
+            "any(bytes,address[7],uint8[2],uint256[6],bytes,bytes)"
+        );
+        const one = {
+            registry: registry.address,
+            maker: accounts[6],
+            staticTarget: statici.address,
+            staticSelector: selector,
+            staticExtradata: "0x",
+            maximumFill: "1",
+            listingTime: "0",
+            expirationTime: "100000000000",
+            salt: randomUint(),
+        };
+        const two = {
+            registry: registry.address,
+            maker: smartContractWallet.address,
+            staticTarget: statici.address,
+            staticSelector: selector,
+            staticExtradata: "0x",
+            maximumFill: "1",
+            listingTime: "0",
+            expirationTime: "100000000000",
+            salt: randomUint(),
+        };
+
+        await Promise.all([
+            exchange.approveOrder(one, false, { from: accounts[6] }),
+            smartContractWallet.approveOrder_(
+                exchange.inst.address,
+                two.registry,
+                two.maker,
+                two.staticTarget,
+                two.staticSelector,
+                two.staticExtradata,
+                two.maximumFill,
+                two.listingTime,
+                two.expirationTime,
+                two.salt,
+                false,
+                { from: accounts[6] }
+            ),
+        ]);
+        const call = {
+            target: statici.address,
+            howToCall: 0,
+            data: web3.eth.abi.encodeFunctionSignature("test()"),
+        };
+        assert.isOk(
+            await exchange.atomicMatchWith(
+                two,
+                NULL_SIG,
+                call,
+                one,
+                NULL_SIG,
+                call,
+                ZERO_BYTES32,
+                { value: value, from: accounts[6] }
+            )
+        );
+        assert.equal(
+            await web3.eth.getBalance(smartContractWallet.address),
+            value.toString()
         );
     });
 

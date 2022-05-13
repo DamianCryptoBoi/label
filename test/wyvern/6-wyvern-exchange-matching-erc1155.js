@@ -670,7 +670,8 @@ contract("WyvernExchange", (accounts) => {
 
         let twoSig = await exchange.sign(two, account_b);
 
-        for (let i = 0; i < fillCount; ++i)
+        for (let i = 0; i < fillCount; ++i) {
+            console.log(i);
             await exchange.atomicMatchWith(
                 one,
                 sig,
@@ -681,6 +682,7 @@ contract("WyvernExchange", (accounts) => {
                 ZERO_BYTES32,
                 { from: account_b }
             );
+        }
 
         let new_balance = await erc1155.balanceOf(account_a, tokenId);
         assert.isTrue(new_balance.toNumber() > 0, "Incorrect balance");
