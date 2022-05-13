@@ -27,11 +27,17 @@ describe("Collection", function () {
         expect(await label1155.owner()).to.equal(owner.address);
     });
 
+    it("Should upgrade", async function () {
+        await upgrades.upgradeProxy(label1155.address, Label1155, {
+            kind: "uups",
+        });
+    });
+
     it("Mint", async function () {
         const predicatedId = getPredicateId(owner.address, 0, 100);
 
         await label1155.mint(
-            [addr1.address, addr2.address, owner.address], // acount
+            [addr1.address, addr2.address, owner.address], // account
             [10, 20, 30], // amount
             100,
             predicatedId,
@@ -43,7 +49,7 @@ describe("Collection", function () {
         );
         await expect(
             label1155.mint(
-                [addr1.address, addr2.address, owner.address], // acount
+                [addr1.address, addr2.address, owner.address], // account
                 [10, 20, 30], // amount
                 100,
                 predicatedId,
@@ -99,7 +105,7 @@ describe("Collection", function () {
         const predicatedId = getPredicateId(owner.address, 0, 100);
         await expect(
             label1155.mint(
-                [addr1.address, addr2.address, owner.address], // acount
+                [addr1.address, addr2.address, owner.address], // account
                 [10, 20], // amount
                 100,
                 predicatedId,
@@ -123,7 +129,7 @@ describe("Collection", function () {
         )).to.be.revertedWith("Invalid royalties");
         await expect(
             label1155.mint(
-                [addr1.address, addr2.address, owner.address], // acount
+                [addr1.address, addr2.address, owner.address], // account
                 [10, 20, 30], // amount
                 100,
                 1,
@@ -136,7 +142,7 @@ describe("Collection", function () {
         ).to.be.revertedWith("Invalid ID and creator");
         await expect(
             label1155.mint(
-                [addr1.address, addr2.address, owner.address], // acount
+                [addr1.address, addr2.address, owner.address], // account
                 [10, 20, 30], // amount
                 100,
                 predicatedId,
@@ -150,7 +156,7 @@ describe("Collection", function () {
 
         await expect(
             label1155.connect(addr2).mint(
-                [addr1.address, addr2.address, owner.address], // acount
+                [addr1.address, addr2.address, owner.address], // account
                 [10, 20, 30], // amount
                 100,
                 predicatedId,
@@ -161,10 +167,25 @@ describe("Collection", function () {
                 "0x"
             )
         ).to.be.revertedWith("Not minter");
+
+        await expect(
+            label1155.mint(
+                [addr1.address, addr2.address, owner.address], // account
+                [10, 20, 30], // amount
+                100,
+                predicatedId,
+                "/abc",
+                [owner.address, addr2.address, addr3.address],
+                [6000, 2000, 1000],
+                500,
+                "0x"
+            )
+        ).to.be.revertedWith("Invalid royalties");
+
         await label1155.pause();
         await expect(
             label1155.mint(
-                [addr1.address, addr2.address, owner.address], // acount
+                [addr1.address, addr2.address, owner.address], // account
                 [10, 20, 30], // amount
                 100,
                 predicatedId,
@@ -177,7 +198,7 @@ describe("Collection", function () {
         ).to.be.revertedWith("Pausable: paused");
         await label1155.unpause();
         await label1155.mint(
-            [addr1.address, addr2.address, owner.address], // acount
+            [addr1.address, addr2.address, owner.address], // account
             [10, 20, 30], // amount
             100,
             predicatedId,
@@ -187,5 +208,63 @@ describe("Collection", function () {
             500,
             "0x"
         );
+    });
+
+    it("safeMultiTransferFrom", async function () {
+        const predicatedId = getPredicateId(owner.address, 0, 100);
+
+        await label1155.mint(
+            [owner.address], // account
+            [100], // amount
+            100,
+            predicatedId,
+            "/abc",
+            [owner.address],
+            [10000],
+            500,
+            "0x"
+        );
+
+        const predicatedId1 = getPredicateId(owner.address, 1, 100);
+
+        await label1155.mint(
+            [owner.address], // account
+            [100], // amount
+            100,
+            predicatedId1,
+            "/abc",
+            [owner.address],
+            [10000],
+            500,
+            "0x"
+        );
+
+        await label1155.safeMultiTransferFrom(
+            owner.address,
+            [addr1.address, addr2.address],
+            [predicatedId, predicatedId1],
+            [100, 100],
+            "0x"
+        );
+
+        await expect(
+            label1155
+                .connect(addr1)
+                .safeMultiTransferFrom(
+                    owner.address,
+                    [addr1.address, addr2.address],
+                    [predicatedId, predicatedId1],
+                    [100, 100],
+                    "0x"
+                )
+        ).to.be.reverted;
+
+        expect(
+            (await label1155.balanceOf(addr1.address, predicatedId)).toNumber()
+        ).to.equal(100);
+
+        expect(
+            (await label1155.balanceOf(addr2.address, predicatedId1)).toNumber()
+        ).to.equal(100);
     });
 });

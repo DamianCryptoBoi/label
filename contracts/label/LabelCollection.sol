@@ -162,10 +162,7 @@ contract LabelCollection is
             "Invalid ID and creator"
         );
 
-        require(
-            accounts.length > 0 && accounts.length == amounts.length,
-            "Invalid accounts"
-        );
+        require(accounts.length == amounts.length, "Invalid accounts");
 
         require(
             creators.length > 0 && creators.length == royalties.length,
@@ -204,6 +201,23 @@ contract LabelCollection is
         }
 
         return id;
+    }
+
+    function safeMultiTransferFrom(
+        address from,
+        address[] memory tos,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) public {
+        require(
+            from == _msgSender() || isApprovedForAll(from, _msgSender()),
+            "ERC1155: caller is not owner nor approved"
+        );
+
+        for (uint256 i = 0; i < ids.length; i++) {
+            _safeTransferFrom(from, tos[i], ids[i], amounts[i], data);
+        }
     }
 
     function tokenUri(uint256 id) public view returns (string memory) {
