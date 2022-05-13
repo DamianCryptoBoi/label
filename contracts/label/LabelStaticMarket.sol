@@ -2,7 +2,6 @@
 
 pragma solidity 0.7.5;
 import "../wyvern/StaticMarket.sol";
-import "hardhat/console.sol";
 
 contract LabelStaticMarket is StaticMarket {
     constructor() {}

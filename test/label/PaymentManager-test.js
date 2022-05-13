@@ -83,6 +83,10 @@ describe("Payment Manager", function () {
 
         await payment.deployed();
 
+        await upgrades.upgradeProxy(payment.address, PaymentManager, {
+            kind: "uups",
+        });
+
         await payment.payForNFT(account_b.address, mr, 0, erc20.address, 10);
 
         await erc20.mint(accounts[0].address, 1000000000000);
@@ -118,7 +122,7 @@ describe("Payment Manager", function () {
         ).to.equal(0);
     };
 
-    it("Payment Manager Test", async () => {
+    it("Payment Manager Flow Test", async () => {
         const price = 10000;
 
         return test({

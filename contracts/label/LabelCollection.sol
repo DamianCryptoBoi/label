@@ -162,10 +162,7 @@ contract LabelCollection is
             "Invalid ID and creator"
         );
 
-        require(
-            accounts.length > 0 && accounts.length == amounts.length,
-            "Invalid accounts"
-        );
+        require(accounts.length == amounts.length, "Invalid accounts");
 
         require(
             creators.length > 0 && creators.length == royalties.length,
