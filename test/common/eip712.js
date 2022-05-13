@@ -11,7 +11,7 @@ function encodeType(name, fields) {
 }
 
 function typeHash(name, fields) {
-    return ethUtil.rlphash(encodeType(name, fields));
+    return ethUtil.sha3(encodeType(name, fields));
 }
 
 function encodeData(name, fields, data) {
@@ -27,7 +27,7 @@ function encodeData(name, fields, data) {
         let value = data[field.name];
         if (field.type === "string" || field.type === "bytes") {
             encTypes.push("bytes32");
-            value = ethUtil.rlphash(value);
+            value = ethUtil.sha3(value);
             encValues.push(value);
         } else {
             encTypes.push(field.type);
@@ -39,7 +39,7 @@ function encodeData(name, fields, data) {
 }
 
 function structHash(name, fields, data) {
-    return ethUtil.rlphash(encodeData(name, fields, data));
+    return ethUtil.sha3(encodeData(name, fields, data));
 }
 
 const eip712Domain = {
@@ -53,7 +53,7 @@ const eip712Domain = {
 };
 
 function signHash(typedData) {
-    return ethUtil.rlphash(
+    return ethUtil.sha3(
         Buffer.concat([
             Buffer.from("1901", "hex"),
             structHash(

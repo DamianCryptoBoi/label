@@ -15,12 +15,12 @@ const {
 
 contract("WyvernExchange", (accounts) => {
     const withExchangeAndRegistry = async () => {
-        // const prefix = Buffer.from("\x19Bogus Signed Message:\n",'binary');
+        const prefix = Buffer.from("\x19Bogus Signed Message:\n", "binary");
         let registry = await WyvernRegistry.new();
         let exchange = await WyvernExchange.new(
             CHAIN_ID,
             [registry.address],
-            "0x"
+            prefix
         );
         // let [exchange,registry] = await Promise.all([WyvernExchange.new(CHAIN_ID,[registry.address],prefix),WyvernRegistry.new()])
         return { exchange: wrap(exchange), registry };
@@ -191,32 +191,6 @@ contract("WyvernExchange", (accounts) => {
         );
     });
 
-    it("validates valid authorization by signature (personal_sign)", async () => {
-        let { exchange, registry } = await withExchangeAndRegistry();
-        let example = {
-            registry: registry.address,
-            maker: accounts[1],
-            staticTarget: exchange.address,
-            staticSelector: "0x00000000",
-            staticExtradata: "0x",
-            maximumFill: "1",
-            listingTime: "0",
-            expirationTime: "1000000000000",
-            salt: "100231",
-        };
-        let hash = hashOrder(example);
-        let signature = await exchange.personalSign(example, accounts[1]);
-        assert.isTrue(
-            await exchange.validateOrderAuthorization(
-                hash,
-                accounts[1],
-                signature,
-                { from: accounts[5] }
-            ),
-            "Should have validated"
-        );
-    });
-
     it("does not validate authorization by signature with different prefix (personal_sign)", async () => {
         const prefix = Buffer.from("\x19Bogus Signed Message:\n", "binary");
         let registry = await WyvernRegistry.new();
@@ -230,7 +204,7 @@ contract("WyvernExchange", (accounts) => {
         let example = {
             registry: registry.address,
             maker: accounts[1],
-            staticTarget: wrappedexchange.address,
+            staticTarget: wrappedExchange.address,
             staticSelector: "0x00000000",
             staticExtradata: "0x",
             maximumFill: "1",

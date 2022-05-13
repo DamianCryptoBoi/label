@@ -217,18 +217,6 @@ contract("WyvernRegistry", (accounts) => {
         );
     });
 
-    // it("allows end after time has passed", async () => {
-    //     let registry = await WyvernRegistry.new();
-    //     await registry.registerProxyFor(accounts[0]);
-    //     await increaseTime(86400 * 7 * 3);
-    //     await registry.endGrantAuthentication(accounts[0]);
-    //     let result = await registry.contracts.call(accounts[0]);
-    //     assert.isTrue(result, "Auth was not granted");
-    //     await registry.revokeAuthentication(accounts[0]);
-    //     result = await registry.contracts.call(accounts[0]);
-    //     assert.isFalse(result, "Auth was not revoked");
-    // });
-
     it("allows proxy registration for another user", async () => {
         let registry = await WyvernRegistry.new();
         await registry.registerProxyFor(accounts[1]);
