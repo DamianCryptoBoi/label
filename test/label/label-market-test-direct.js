@@ -13,7 +13,7 @@ const {
     encodeMatchingCall,
 } = require("../common/util");
 
-describe("Exchange", function () {
+describe("Exchange Direct", function () {
     beforeEach(async () => {
         accounts = await ethers.getSigners();
 

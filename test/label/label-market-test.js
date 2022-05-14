@@ -10,6 +10,7 @@ const {
     CHAIN_ID,
     assertIsRejected,
     getPredicateId,
+    ZERO_ADDRESS,
 } = require("../common/util");
 
 describe("Exchange", function () {
@@ -72,6 +73,7 @@ describe("Exchange", function () {
             platformFeeRecipient,
             platformFee,
             moneyReceiver,
+            encodedReceiver,
         } = options;
 
         id = getPredicateId(creators[0], tokenId, erc1155MintAmount);
@@ -213,7 +215,7 @@ describe("Exchange", function () {
         const secondData = paymentc.methods
             .payForNFT(
                 account_b.address,
-                mr,
+                encodedReceiver ? encodedReceiver : mr,
                 buyAmount * buyingPrice,
                 erc20.address,
                 id
@@ -601,6 +603,33 @@ describe("Exchange", function () {
             }),
             /Static call failed/,
             "Order should not match the second time."
+        );
+    });
+
+    it("StaticMarket: does not match erc1155 <> erc20 order, wrongly encoded", async () => {
+        const price = 10000;
+
+        return assertIsRejected(
+            test({
+                tokenId: 5,
+                sellAmount: 1,
+                sellingPrice: price,
+                buyingPrice: price,
+                buyAmount: 1,
+                erc1155MintAmount: 1,
+                erc20MintAmount: price,
+                account_a: accounts[1],
+                account_b: accounts[6],
+                sender: accounts[6],
+                creators: [accounts[2].address, accounts[3].address],
+                royalties: [6000, 4000],
+                totalRoyalties: 500,
+                platformFeeRecipient: accounts[5].address,
+                platformFee: 150,
+                moneyReceiver: accounts[1].address,
+                encodedReceiver: accounts[3].address,
+            }),
+            /Static call failed/
         );
     });
 });
