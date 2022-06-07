@@ -2,7 +2,7 @@ require("dotenv").config();
 
 require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-waffle");
-// require("hardhat-gas-reporter");
+require("hardhat-gas-reporter");
 require("solidity-coverage");
 require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-web3");
@@ -11,12 +11,6 @@ require("@nomiclabs/hardhat-truffle5");
 module.exports = {
     solidity: {
         compilers: [
-            {
-                version: "0.5.16",
-            },
-            {
-                version: "0.6.6",
-            },
             {
                 version: "0.7.5",
                 settings: {
@@ -45,18 +39,31 @@ module.exports = {
             blockGasLimit: 0x1fffffffffffff,
             allowUnlimitedContractSize: true,
             timeout: 1800000,
-            chainId: 8888,
+            chainId: 97,
+            forking: {
+                url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+                blockNumber: 19975376,
+            },
         },
 
-        // testBSC: {
-        //     url: "https://data-seed-prebsc-1-s1.binance.org:8545",
-        //     accounts: [process.env.PRIVATE_KEY], // 0xf9128f6E4faF9fc364a6d737221a93E9b97CBC68
-        //     gas: 12000000,
-        //     blockGasLimit: 0x1fffffffffffff,
-        //     allowUnlimitedContractSize: true,
-        //     timeout: 1800000,
-        //     chainId: 97,
-        // },
+        local: {
+            url: "http://127.0.0.1:8545/",
+            gas: 12000000,
+            blockGasLimit: 0x1fffffffffffff,
+            allowUnlimitedContractSize: true,
+            timeout: 1800000,
+            chainId: 97,
+        },
+
+        testBSC: {
+            url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+            accounts: [process.env.PRIVATE_KEY], // 0xf9128f6E4faF9fc364a6d737221a93E9b97CBC68
+            gas: 12000000,
+            blockGasLimit: 0x1fffffffffffff,
+            allowUnlimitedContractSize: true,
+            timeout: 1800000,
+            chainId: 97,
+        },
 
         // mainnetBSC: {
         //     url: "https://bsc-dataseed.binance.org/",
@@ -75,6 +82,11 @@ module.exports = {
 
     mocha: {
         timeout: 1800000,
+    },
+
+    gasReporter: {
+        enabled: false,
+        currency: "USD",
     },
 
     // contractSizer: {

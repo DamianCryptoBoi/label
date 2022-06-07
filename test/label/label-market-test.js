@@ -89,7 +89,7 @@ describe("Exchange", function () {
 
         let payment = await upgrades.deployProxy(
             PaymentManager,
-            [erc1155.address, platformFeeRecipient, platformFee],
+            [[erc1155.address], platformFeeRecipient, platformFee],
             {
                 kind: "uups",
             }
@@ -218,6 +218,7 @@ describe("Exchange", function () {
                 encodedReceiver ? encodedReceiver : mr,
                 buyAmount * buyingPrice,
                 erc20.address,
+                erc1155.address,
                 id
             )
             .encodeABI();

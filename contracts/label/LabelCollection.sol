@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.9;
+pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -96,6 +96,13 @@ contract LabelCollection is
         for (uint8 i = 0; i < minters.length; i++) {
             isMinter[minters[i]] = isAuthorized;
         }
+    }
+
+    function setProxyRegistryAddress(address _proxyRegistryAddress)
+        external
+        onlyOwner
+    {
+        proxyRegistryAddress = _proxyRegistryAddress;
     }
 
     function setURI(string memory newuri) public onlyOwner {

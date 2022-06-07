@@ -91,7 +91,7 @@ describe("Exchange Direct", function () {
 
         let payment = await upgrades.deployProxy(
             PaymentManager,
-            [erc1155.address, platformFeeRecipient, platformFee],
+            [[erc1155.address], platformFeeRecipient, platformFee],
             {
                 kind: "uups",
             }
@@ -162,20 +162,22 @@ describe("Exchange Direct", function () {
         );
 
         const paramsOne = web3.eth.abi.encodeParameters(
-            ["address[2]", "address", "uint256[3]"],
+            ["address[2]", "address", "uint256[3]", "string"],
             [
                 [erc1155.address, erc20.address],
                 payment.address,
                 [id, sellingNumerator || 1, sellingPrice],
+                "1",
             ]
         );
 
         const paramsTwo = web3.eth.abi.encodeParameters(
-            ["address[2]", "address", "uint256[3]"],
+            ["address[2]", "address", "uint256[3]", "string"],
             [
                 [erc20.address, erc1155.address],
                 payment.address,
                 [buyTokenId ? bid : id, buyingPrice, buyingDenominator || 1],
+                "1",
             ]
         );
 
@@ -220,7 +222,9 @@ describe("Exchange Direct", function () {
                 mr,
                 buyAmount * buyingPrice,
                 erc20.address,
-                id
+                erc1155.address,
+                id,
+                "1"
             )
             .encodeABI();
 
