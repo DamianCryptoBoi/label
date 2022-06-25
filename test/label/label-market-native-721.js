@@ -84,6 +84,7 @@ contract("WyvernExchange", () => {
 
         await registry.connect(account_a).registerProxy();
         let proxy1 = await registry.proxies(account_a.address);
+
         assert.equal(true, proxy1.length > 0, "no proxy address for account a");
 
         await registry.connect(account_b).registerProxy();

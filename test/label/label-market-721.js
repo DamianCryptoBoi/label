@@ -77,10 +77,8 @@ contract("WyvernExchange", () => {
 
         await payment.deployed();
 
-        await registry.registerProxy();
-        let proxy1 = await registry
-            .connect(account_a)
-            .proxies(account_a.address);
+        await registry.connect(account_a).registerProxy();
+        let proxy1 = await registry.proxies(account_a.address);
         assert.equal(true, proxy1.length > 0, "no proxy address for account a");
 
         await registry.connect(account_b).registerProxy();
@@ -103,7 +101,15 @@ contract("WyvernExchange", () => {
             erc20.mint(account_b.address, erc20MintAmount),
         ]);
 
-        if (buyTokenId) await erc721.mint(account_a.address, buyTokenId);
+        if (buyTokenId)
+            await erc721.mint(
+                account_a.address,
+                buyTokenId,
+                "/abc",
+                creators,
+                royalties,
+                totalRoyalties
+            );
 
         const erc721c = new web3.eth.Contract(
             LabelCollectionA.abi,
@@ -204,16 +210,19 @@ contract("WyvernExchange", () => {
             ZERO_BYTES32
         );
 
-        // let [account_a_erc20_balance, token_owner] = await Promise.all([
-        //     erc20.balanceOf(account_a),
-        //     erc721.ownerOf(tokenId),
-        // ]);
-        // assert.equal(
-        //     account_a_erc20_balance.toNumber(),
-        //     sellingPrice,
-        //     "Incorrect ERC20 balance"
-        // );
-        // assert.equal(token_owner, account_b, "Incorrect token owner");
+        receiveAmount =
+            sellingPrice * (1 - (platformFee + totalRoyalties) / 10000);
+
+        let [account_a_erc20_balance, token_owner] = await Promise.all([
+            erc20.balanceOf(account_a.address),
+            erc721.ownerOf(tokenId),
+        ]);
+        assert.equal(
+            account_a_erc20_balance.toNumber(),
+            receiveAmount,
+            "Incorrect ERC20 balance"
+        );
+        assert.equal(token_owner, account_b.address, "Incorrect token owner");
     };
 
     it("StaticMarket: matches erc721 <> erc20 order", async () => {
@@ -224,7 +233,7 @@ contract("WyvernExchange", () => {
             sellingPrice: price,
             buyingPrice: price,
             erc20MintAmount: price,
-            account_a: accounts[0],
+            account_a: accounts[5],
             account_b: accounts[6],
             sender: accounts[1],
             creators: [accounts[2].address, accounts[3].address],
@@ -235,72 +244,72 @@ contract("WyvernExchange", () => {
         });
     });
 
-    // it("StaticMarket: does not fill erc721 <> erc20 order with different prices", async () => {
-    //     const price = 15000;
+    it("StaticMarket: does not fill erc721 <> erc20 order with different prices", async () => {
+        const price = 15000;
 
-    //     return assertIsRejected(
-    //         erc721_for_erc20_test({
-    //             tokenId: 10,
-    //             sellingPrice: price,
-    //             buyingPrice: price - 1,
-    //             erc20MintAmount: price,
-    //             account_a: accounts[0],
-    //             account_b: accounts[6],
-    //             sender: accounts[1],
-    //             creators: [accounts[2].address, accounts[3].address],
-    //             royalties: [6000, 4000],
-    //             totalRoyalties: 500,
-    //             platformFeeRecipient: accounts[4],
-    //             platformFee: 100,
-    //         }),
-    //         /Static call failed/,
-    //         "Order should not have matched"
-    //     );
-    // });
+        return assertIsRejected(
+            erc721_for_erc20_test({
+                tokenId: 10,
+                sellingPrice: price,
+                buyingPrice: price - 1,
+                erc20MintAmount: price,
+                account_a: accounts[0],
+                account_b: accounts[6],
+                sender: accounts[1],
+                creators: [accounts[2].address, accounts[3].address],
+                royalties: [6000, 4000],
+                totalRoyalties: 500,
+                platformFeeRecipient: accounts[4],
+                platformFee: 100,
+            }),
+            /Static call failed/,
+            "Order should not have matched"
+        );
+    });
 
-    // it("StaticMarket: does not fill erc721 <> erc20 order if the balance is insufficient", async () => {
-    //     const price = 15000;
+    it("StaticMarket: does not fill erc721 <> erc20 order if the balance is insufficient", async () => {
+        const price = 15000;
 
-    //     return assertIsRejected(
-    //         erc721_for_erc20_test({
-    //             tokenId: 10,
-    //             sellingPrice: price,
-    //             buyingPrice: price,
-    //             erc20MintAmount: price - 1,
-    //             account_a: accounts[0],
-    //             account_b: accounts[6],
-    //             sender: accounts[1],
-    //             creators: [accounts[2].address, accounts[3].address],
-    //             royalties: [6000, 4000],
-    //             totalRoyalties: 500,
-    //             platformFeeRecipient: accounts[4],
-    //             platformFee: 100,
-    //         }),
-    //         /Second call failed/,
-    //         "Order should not have matched"
-    //     );
-    // });
+        return assertIsRejected(
+            erc721_for_erc20_test({
+                tokenId: 10,
+                sellingPrice: price,
+                buyingPrice: price,
+                erc20MintAmount: price - 1,
+                account_a: accounts[0],
+                account_b: accounts[6],
+                sender: accounts[1],
+                creators: [accounts[2].address, accounts[3].address],
+                royalties: [6000, 4000],
+                totalRoyalties: 500,
+                platformFeeRecipient: accounts[4],
+                platformFee: 100,
+            }),
+            /Second call failed/,
+            "Order should not have matched"
+        );
+    });
 
-    // it("StaticMarket: does not fill erc721 <> erc20 order if the token IDs are different", async () => {
-    //     const price = 15000;
+    it("StaticMarket: does not fill erc721 <> erc20 order if the token IDs are different", async () => {
+        const price = 15000;
 
-    //     return assertIsRejected(
-    //         erc721_for_erc20_test({
-    //             tokenId: 10,
-    //             buyTokenId: 11,
-    //             sellingPrice: price,
-    //             buyingPrice: price,
-    //             erc20MintAmount: price,
-    //             account_a: accounts[0],
-    //             account_b: accounts[6],
-    //             creators: [accounts[2].address, accounts[3].address],
-    //             royalties: [6000, 4000],
-    //             totalRoyalties: 500,
-    //             platformFeeRecipient: accounts[4],
-    //             platformFee: 100,
-    //         }),
-    //         /Static call failed/,
-    //         "Order should not have matched"
-    //     );
-    // });
+        return assertIsRejected(
+            erc721_for_erc20_test({
+                tokenId: 10,
+                buyTokenId: 11,
+                sellingPrice: price,
+                buyingPrice: price,
+                erc20MintAmount: price,
+                account_a: accounts[0],
+                account_b: accounts[6],
+                creators: [accounts[2].address, accounts[3].address],
+                royalties: [6000, 4000],
+                totalRoyalties: 500,
+                platformFeeRecipient: accounts[4],
+                platformFee: 100,
+            }),
+            /Static call failed/,
+            "Order should not have matched"
+        );
+    });
 });

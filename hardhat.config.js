@@ -40,10 +40,10 @@ module.exports = {
             allowUnlimitedContractSize: true,
             timeout: 1800000,
             chainId: 97,
-            forking: {
-                url: "https://data-seed-prebsc-1-s1.binance.org:8545",
-                blockNumber: 19975376,
-            },
+            // forking: {
+            //     url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+            //     blockNumber: 19975376,
+            // },
         },
 
         local: {
@@ -56,12 +56,14 @@ module.exports = {
         },
 
         testBSC: {
-            url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+            // url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+            url: "https://speedy-nodes-nyc.moralis.io/feb2772b66e2a0a57e78beaa/bsc/testnet",
+
             accounts: [process.env.PRIVATE_KEY], // 0xf9128f6E4faF9fc364a6d737221a93E9b97CBC68
             gas: 12000000,
             blockGasLimit: 0x1fffffffffffff,
             allowUnlimitedContractSize: true,
-            timeout: 1800000,
+            timeout: 100000000,
             chainId: 97,
         },
 

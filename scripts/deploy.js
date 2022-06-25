@@ -9,31 +9,31 @@ async function main() {
 
     [owner] = await ethers.getSigners();
 
-    // Registry = await ethers.getContractFactory("WyvernRegistry");
-    // registry = await Registry.deploy();
-    // await registry.deployed();
-    // console.log("WyvernRegistry: " + registry.address);
+    Registry = await ethers.getContractFactory("WyvernRegistry");
+    registry = await Registry.deploy();
+    await registry.deployed();
+    console.log("WyvernRegistry: " + registry.address);
 
-    // Exchange = await ethers.getContractFactory("WyvernExchange");
-    // exchange = await Exchange.deploy(CHAIN_ID, [registry.address], "0x");
-    // await exchange.deployed();
-    // console.log("WyvernExchange: " + exchange.address);
+    Exchange = await ethers.getContractFactory("WyvernExchange");
+    exchange = await Exchange.deploy(CHAIN_ID, [registry.address], "0x");
+    await exchange.deployed();
+    console.log("WyvernExchange: " + exchange.address);
 
-    // ERC1155 = await ethers.getContractFactory("LabelCollection");
-    // erc1155 = await upgrades.deployProxy(ERC1155, ["", registry.address], {
-    //     kind: "uups",
-    // });
-    // await erc1155.deployed();
+    ERC1155 = await ethers.getContractFactory("LabelCollection");
+    erc1155 = await upgrades.deployProxy(ERC1155, ["", registry.address], {
+        kind: "uups",
+    });
+    await erc1155.deployed();
 
-    // console.log("LabelCollection: " + erc1155.address);
+    console.log("LabelCollection: " + erc1155.address);
 
-    // ERC721 = await ethers.getContractFactory("LabelCollection721");
-    // erc721 = await upgrades.deployProxy(ERC721, ["", registry.address], {
-    //     kind: "uups",
-    // });
-    // await erc721.deployed();
+    ERC721 = await ethers.getContractFactory("LabelCollection721");
+    erc721 = await upgrades.deployProxy(ERC721, ["", registry.address], {
+        kind: "uups",
+    });
+    await erc721.deployed();
 
-    // console.log("LabelCollection 721: " + erc721.address);
+    console.log("LabelCollection 721: " + erc721.address);
 
     PFP = await ethers.getContractFactory("LabelPFP");
     pfp = await upgrades.deployProxy(
@@ -59,48 +59,48 @@ async function main() {
 
     console.log("Headset Collection: " + hs.address);
 
-    // platformFeeRecipient = FEE_RECEIVER;
-    // platformFee = 250; // 2.5%
+    platformFeeRecipient = FEE_RECEIVER;
+    platformFee = 250; // 2.5%
 
-    // PaymentManager = await ethers.getContractFactory("PaymentManager");
-    // payment = await upgrades.deployProxy(
-    //     PaymentManager,
-    //     [
-    //         // [erc1155.address, erc721.address, pfp.address, hs.address],
-    //         [
-    //             "0xc03Fe6e09053D1426c45250A2f3Fd3b6E3A50905",
-    //             "0xC7B62044875E4b211F4F2D5D1A6d41751A7C046B",
-    //             "0x5EBBFc265d14078D4ae6051B531FEDF48a972C7e",
-    //             "0x3aE076721701d9d0a592767c39F5c08a74eE4E35",
-    //         ],
-    //         platformFeeRecipient,
-    //         platformFee,
-    //     ],
-    //     {
-    //         kind: "uups",
-    //     }
-    // );
-    // await payment.deployed();
+    PaymentManager = await ethers.getContractFactory("PaymentManager");
+    payment = await upgrades.deployProxy(
+        PaymentManager,
+        [
+            [erc1155.address, erc721.address, pfp.address, hs.address],
+            // [
+            //     "0xc03Fe6e09053D1426c45250A2f3Fd3b6E3A50905",
+            //     "0xC7B62044875E4b211F4F2D5D1A6d41751A7C046B",
+            //     "0x5EBBFc265d14078D4ae6051B531FEDF48a972C7e",
+            //     "0x3aE076721701d9d0a592767c39F5c08a74eE4E35",
+            // ],
+            platformFeeRecipient,
+            platformFee,
+        ],
+        {
+            kind: "uups",
+        }
+    );
+    await payment.deployed();
 
-    // console.log("PaymentManager: " + payment.address);
+    console.log("PaymentManager: " + payment.address);
 
-    // StaticMarket = await ethers.getContractFactory("LabelStaticMarket");
-    // let statici = await StaticMarket.deploy();
-    // await statici.deployed();
+    StaticMarket = await ethers.getContractFactory("LabelStaticMarket");
+    let statici = await StaticMarket.deploy();
+    await statici.deployed();
 
-    // console.log("StaticMarket: " + statici.address);
+    console.log("StaticMarket: " + statici.address);
 
-    // MM = await ethers.getContractFactory("MatchingMachine");
-    // mm = await MM.deploy(exchange.address);
-    // await mm.deployed();
+    MM = await ethers.getContractFactory("MatchingMachine");
+    mm = await MM.deploy(exchange.address);
+    await mm.deployed();
 
-    // console.log("Matching machine: " + mm.address);
+    console.log("Matching machine: " + mm.address);
 
-    // console.log("-----------SETTINGS AFTER DEPLOY-----------");
+    console.log("-----------SETTINGS AFTER DEPLOY-----------");
 
-    // await registry.grantInitialAuthentication(exchange.address);
+    await registry.grantInitialAuthentication(exchange.address);
 
-    // console.log("-----------DONE-----------");
+    console.log("-----------DONE-----------");
 }
 
 main().catch((error) => {

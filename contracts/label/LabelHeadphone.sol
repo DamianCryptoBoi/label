@@ -37,7 +37,7 @@ contract LabelHeadset is
         uint256[] memory _royalties,
         uint256 _totalRoyalty
     ) public initializer {
-        __ERC721_init("Label Headset Collection", "LABEL");
+        __ERC721_init("Label Headphone", "LABEL");
         __ERC721Enumerable_init();
         __Pausable_init();
         __Ownable_init();

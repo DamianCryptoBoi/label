@@ -45,7 +45,7 @@ contract ProxyRegistry {
     mapping(address => OwnableDelegateProxy) public proxies;
 }
 
-contract LabelCollection is
+contract LabelIPRights is
     Initializable,
     ERC1155Upgradeable,
     OwnableUpgradeable,
@@ -83,7 +83,7 @@ contract LabelCollection is
         __Pausable_init();
         __ERC1155Supply_init();
         __UUPSUpgradeable_init();
-        name = "Label Collection";
+        name = "Label IP Rights";
         symbol = "LABEL";
         proxyRegistryAddress = _proxyRegistryAddress;
         isMinter[msg.sender] = true;

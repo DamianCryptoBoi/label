@@ -37,7 +37,7 @@ contract LabelPFP is
         uint256[] memory _royalties,
         uint256 _totalRoyalty
     ) public initializer {
-        __ERC721_init("Label PFP Collection", "LABEL");
+        __ERC721_init("PINBALL HEAD", "LABEL");
         __ERC721Enumerable_init();
         __Pausable_init();
         __Ownable_init();

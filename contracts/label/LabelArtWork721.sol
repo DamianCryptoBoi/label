@@ -46,7 +46,7 @@ contract ProxyRegistry {
     mapping(address => OwnableDelegateProxy) public proxies;
 }
 
-contract LabelCollection721 is
+contract LabelArtWork721 is
     Initializable,
     ERC721Upgradeable,
     ERC721EnumerableUpgradeable,
@@ -79,7 +79,7 @@ contract LabelCollection721 is
         string memory _nftBaseURI,
         address _proxyRegistryAddress
     ) public initializer {
-        __ERC721_init("Label Collection", "LABEL");
+        __ERC721_init("Label Artwork", "LABEL");
         __ERC721Enumerable_init();
         __ERC721URIStorage_init();
         __Pausable_init();
