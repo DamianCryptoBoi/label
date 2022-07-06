@@ -37,9 +37,15 @@ module.exports = {
         hardhat: {
             gas: 120000000,
             blockGasLimit: 0x1fffffffffffff,
-            allowUnlimitedContractSize: true,
             timeout: 1800000,
-            chainId: 97,
+            // allowUnlimitedContractSize: true,
+            chainId: 56,
+            forking: {
+                url: "https://speedy-nodes-nyc.moralis.io/feb2772b66e2a0a57e78beaa/bsc/mainnet",
+                // blockNumber: 19309700,
+            },
+
+            // chainId: 97,
             // forking: {
             //     url: "https://data-seed-prebsc-1-s1.binance.org:8545",
             //     blockNumber: 19975376,
@@ -67,15 +73,11 @@ module.exports = {
             chainId: 97,
         },
 
-        // mainnetBSC: {
-        //     url: "https://bsc-dataseed.binance.org/",
-        //     accounts: [process.env.PRIVATE_KEY],
-        //     gas: 12000000,
-        //     blockGasLimit: 0x1fffffffffffff,
-        //     allowUnlimitedContractSize: true,
-        //     timeout: 1800000,
-        //     chainId: 56,
-        // },
+        mainnetBSC: {
+            url: "https://bsc-dataseed.binance.org/",
+            accounts: [process.env.PRIVATE_KEY],
+            chainId: 56,
+        },
     },
 
     etherscan: {

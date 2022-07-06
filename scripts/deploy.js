@@ -2,7 +2,25 @@ const { ethers, upgrades, network } = require("hardhat");
 
 const CHAIN_ID = network.config.chainId;
 
-const FEE_RECEIVER = "0x05DEd0baaE58E2D242679463bCfeCdfc7a937644";
+const FEE_RECEIVER = "0x05DEd0baaE58E2D242679463bCfeCdfc7a937644"; // platform fee receiver
+const PLATFORM_FEE = 250; // 2.5%
+const LABEL_COLLECTION_1155_BASE_URI = "";
+const LABEL_COLLECTION_721_BASE_URI = "";
+const LABEL_ARTWORK_721_BASE_URI = "";
+const LABEL_ARTWORK_1155_BASE_URI = "";
+const LABEL_IP_RIGHTS_BASE_URI = "";
+const LABEL_PFP_BASE_URI = "";
+const LABEL_HEADPHONE_BASE_URI = "";
+
+const PFP_SUPPLY_CAP = 9999;
+const PFP_CREATORS = ["0x0000000000000000000000000000000000000000"];
+const PFP_ROYALTIES = [10000]; // 10000 = 100% of total royalties
+const PFP_TOTAL_ROYALTIES = 0; // 100 = 1%
+
+const HP_SUPPLY_CAP = 9999;
+const HP_CREATORS = ["0x0000000000000000000000000000000000000000"];
+const HP_ROYALTIES = [10000]; // 10000 = 100% of total royalties
+const HP_TOTAL_ROYALTIES = 0; // 100 = 1%
 
 async function main() {
     console.log("-----------DEPLOYMENT STARTED-----------");
@@ -19,18 +37,62 @@ async function main() {
     await exchange.deployed();
     console.log("WyvernExchange: " + exchange.address);
 
-    ERC1155 = await ethers.getContractFactory("LabelCollection");
-    erc1155 = await upgrades.deployProxy(ERC1155, ["", registry.address], {
-        kind: "uups",
-    });
+    IP = await ethers.getContractFactory("LabelIPRights");
+    ip = await upgrades.deployProxy(
+        IP,
+        [LABEL_IP_RIGHTS_BASE_URI, registry.address],
+        {
+            kind: "uups",
+        }
+    );
+    await ip.deployed();
+
+    console.log("IP Rights: " + ip.address);
+
+    A1155 = await ethers.getContractFactory("LabelArtWork1155");
+    a1155 = await upgrades.deployProxy(
+        A1155,
+        [LABEL_ARTWORK_1155_BASE_URI, registry.address],
+        {
+            kind: "uups",
+        }
+    );
+    await a1155.deployed();
+
+    console.log("LabelArtWork 1155: " + a1155.address);
+
+    A721 = await ethers.getContractFactory("LabelArtWork721");
+    a721 = await upgrades.deployProxy(
+        A721,
+        [LABEL_ARTWORK_721_BASE_URI, registry.address],
+        {
+            kind: "uups",
+        }
+    );
+    await a721.deployed();
+
+    console.log("LabelArtWork 721: " + a721.address);
+
+    ERC1155 = await ethers.getContractFactory("LabelCollection1155");
+    erc1155 = await upgrades.deployProxy(
+        ERC1155,
+        [LABEL_COLLECTION_1155_BASE_URI, registry.address],
+        {
+            kind: "uups",
+        }
+    );
     await erc1155.deployed();
 
     console.log("LabelCollection: " + erc1155.address);
 
     ERC721 = await ethers.getContractFactory("LabelCollection721");
-    erc721 = await upgrades.deployProxy(ERC721, ["", registry.address], {
-        kind: "uups",
-    });
+    erc721 = await upgrades.deployProxy(
+        ERC721,
+        [LABEL_COLLECTION_721_BASE_URI, registry.address],
+        {
+            kind: "uups",
+        }
+    );
     await erc721.deployed();
 
     console.log("LabelCollection 721: " + erc721.address);
@@ -38,7 +100,13 @@ async function main() {
     PFP = await ethers.getContractFactory("LabelPFP");
     pfp = await upgrades.deployProxy(
         PFP,
-        ["", 9999, [owner.address], [10000], 200],
+        [
+            LABEL_PFP_BASE_URI,
+            PFP_SUPPLY_CAP,
+            PFP_CREATORS,
+            PFP_ROYALTIES,
+            PFP_TOTAL_ROYALTIES,
+        ],
         {
             kind: "uups",
         }
@@ -47,32 +115,40 @@ async function main() {
 
     console.log("PFP Collection: " + pfp.address);
 
-    Headset = await ethers.getContractFactory("LabelHeadset");
-    hs = await upgrades.deployProxy(
-        Headset,
-        ["", 9999, [owner.address], [10000], 200],
+    Headphone = await ethers.getContractFactory("LabelHeadphone");
+    hp = await upgrades.deployProxy(
+        Headphone,
+        [
+            LABEL_HEADPHONE_BASE_URI,
+            HP_SUPPLY_CAP,
+            HP_CREATORS,
+            HP_ROYALTIES,
+            HP_TOTAL_ROYALTIES,
+        ],
         {
             kind: "uups",
         }
     );
-    await hs.deployed();
+    await hp.deployed();
 
-    console.log("Headset Collection: " + hs.address);
+    console.log("Headphone Collection: " + hp.address);
 
     platformFeeRecipient = FEE_RECEIVER;
-    platformFee = 250; // 2.5%
+    platformFee = PLATFORM_FEE; // 2.5%
 
     PaymentManager = await ethers.getContractFactory("PaymentManager");
     payment = await upgrades.deployProxy(
         PaymentManager,
         [
-            [erc1155.address, erc721.address, pfp.address, hs.address],
-            // [
-            //     "0xc03Fe6e09053D1426c45250A2f3Fd3b6E3A50905",
-            //     "0xC7B62044875E4b211F4F2D5D1A6d41751A7C046B",
-            //     "0x5EBBFc265d14078D4ae6051B531FEDF48a972C7e",
-            //     "0x3aE076721701d9d0a592767c39F5c08a74eE4E35",
-            // ],
+            [
+                ip.address,
+                a721.address,
+                a1155.address,
+                erc1155.address,
+                erc721.address,
+                pfp.address,
+                hp.address,
+            ],
             platformFeeRecipient,
             platformFee,
         ],
@@ -96,6 +172,18 @@ async function main() {
 
     console.log("Matching machine: " + mm.address);
 
+    MintingMachine = await ethers.getContractFactory("MintingMachine");
+    mintingMachine = await MintingMachine.deploy([
+        ip.address,
+        a721.address,
+        a1155.address,
+        erc1155.address,
+        erc721.address,
+    ]);
+    await mintingMachine.deployed();
+
+    console.log("Minting machine: " + mintingMachine.address);
+
     console.log("-----------SETTINGS AFTER DEPLOY-----------");
 
     await registry.grantInitialAuthentication(exchange.address);
@@ -107,16 +195,3 @@ main().catch((error) => {
     console.error(error);
     process.exitCode = 1;
 });
-
-// WyvernRegistry: 0x6215519f4296cADfaF3DD7f5177C59e892395c37
-// WyvernExchange: 0xfB3a9a63e2ca92aBDCdb57f88f61f528bAA640dC
-// LabelCollection: 0xc03Fe6e09053D1426c45250A2f3Fd3b6E3A50905
-// LabelCollection 721: 0xC7B62044875E4b211F4F2D5D1A6d41751A7C046B
-// PFP Collection: 0x5EBBFc265d14078D4ae6051B531FEDF48a972C7e
-// Headset Collection: 0x3aE076721701d9d0a592767c39F5c08a74eE4E35
-// PaymentManager: 0x8A3871213d2138e8d4bE552e98579A1beEf4152E
-// StaticMarket: 0xcFbc0E3c76C93aEF02f4DBd7535d6780D3a7F213
-// Matching machine: 0x29133B81F21f1E35eD8A76AAf6d8ACa943beFb21
-
-// PFP Collection: 0x29F3BE5eeC6Cbf38c7adf05e4d92b74d92c64a46
-// Headset Collection: 0xe9D869e9BAc05aF214020e9AF67D0b013BbB64A3

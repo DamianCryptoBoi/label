@@ -309,6 +309,63 @@ const wrap = (inst) => {
     };
     return obj;
 };
+//         address to,
+//         uint256 tokenId,
+//         string memory uri,
+//         address[] memory creators,
+//         uint256[] memory royalties,
+//         uint256 totalRoyalty
+const encode721MintingCall = (
+    to,
+    tokenId,
+    uri,
+    creators,
+    royalties,
+    totalRoyalty
+) =>
+    web3.eth.abi.encodeFunctionCall(
+        {
+            inputs: [
+                {
+                    internalType: "address",
+                    name: "to",
+                    type: "address",
+                },
+                {
+                    internalType: "uint256",
+                    name: "tokenId",
+                    type: "uint256",
+                },
+                {
+                    internalType: "string",
+                    name: "uri",
+                    type: "string",
+                },
+                {
+                    internalType: "address[]",
+                    name: "creators",
+                    type: "address[]",
+                },
+                {
+                    internalType: "uint256[]",
+                    name: "royalties",
+                    type: "uint256[]",
+                },
+                {
+                    internalType: "uint256",
+                    name: "totalRoyalty",
+                    type: "uint256",
+                },
+            ],
+            name: "mint",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+        },
+        [to, tokenId, uri, creators, royalties, totalRoyalty]
+    );
+
+const encode1155MintingCall = () => web3.eth.abi.encodeFunctionCall();
 
 const encodeMatchingCall = (
     order,
@@ -504,7 +561,8 @@ const atomicMatch = (
         )
     );
 
-const WBNB_ADDRESS = "0xae13d989dac2f0debff460ac112a837c89baa7cd";
+// const WBNB_ADDRESS = "0xae13d989dac2f0debff460ac112a837c89baa7cd";
+const WBNB_ADDRESS = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 
 const WBNB_ABI = [
     {
@@ -669,6 +727,8 @@ module.exports = {
     randomUint,
     getPredicateId,
     encodeMatchingCall,
+    encode721MintingCall,
+    encode1155MintingCall,
     ZERO_ADDRESS,
     ZERO_BYTES32,
     NULL_SIG,
